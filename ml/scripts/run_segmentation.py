@@ -32,6 +32,9 @@ def main() -> None:
     config = SegmentationConfig.from_json(args.config)
     segmenter = MobileSAMSegmenter(config)
     rows = read_manifest_csv(args.manifest)
+    eligible_total = sum(1 for row in rows if not args.split or row.split == args.split)
+    target_total = min(eligible_total, args.limit) if args.limit is not None else eligible_total
+    print(f"Preparing to segment {target_total} images")
     updated_rows = []
     processed = 0
     for row in rows:
@@ -48,6 +51,8 @@ def main() -> None:
         )
         updated_rows.append(replace(row, segmentation_meta_json=meta_json))
         processed += 1
+        if processed == 1 or processed % 10 == 0 or processed == target_total:
+            print(f"Segmented {processed}/{target_total}: {row.image_id}")
     output_manifest = args.output_manifest or args.manifest
     write_manifest_csv(updated_rows, output_manifest)
     print(f"Segmented {processed} images and wrote updated manifest to {output_manifest}")

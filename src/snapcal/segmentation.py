@@ -194,16 +194,22 @@ class MobileSAMSegmenter:
     def __init__(self, config: SegmentationConfig):
         self.config = config
         self._generator = None
+        self._device = None
 
     def _load_generator(self) -> Any:
         if self._generator is not None:
             return self._generator
         try:
+            import torch
             from mobile_sam import SamAutomaticMaskGenerator, sam_model_registry
         except ImportError as exc:  # pragma: no cover - depends on optional dependency
             raise RuntimeError("mobile-sam is not installed. Install snapcal[train] to enable segmentation.") from exc
 
+        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print(f"Loading MobileSAM on device: {self._device}")
         sam = sam_model_registry[self.config.model_type](checkpoint=str(self.config.checkpoint_path))
+        sam.to(device=self._device)
+        sam.eval()
         self._generator = SamAutomaticMaskGenerator(
             model=sam,
             points_per_side=self.config.points_per_side,

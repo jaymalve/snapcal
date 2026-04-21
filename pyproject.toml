@@ -20,7 +20,7 @@ api = [
   "django-cors-headers>=4.4,<5.0",
   "dj-database-url>=2.2,<3.0",
   "gunicorn>=23.0,<24.0",
-  "mobile-sam>=1.0.0",
+  "mobile_sam @ git+https://github.com/ChaoningZhang/MobileSAM.git",
   "psycopg2-binary>=2.9,<3.0",
   "torch>=2.4,<3.0",
   "torchvision>=0.19,<1.0",
@@ -30,7 +30,7 @@ api = [
 ]
 train = [
   "matplotlib>=3.8,<4.0",
-  "mobile-sam>=1.0.0",
+  "mobile_sam @ git+https://github.com/ChaoningZhang/MobileSAM.git",
   "pandas>=2.2,<3.0",
   "scikit-learn>=1.5,<2.0",
   "torch>=2.4,<3.0",
