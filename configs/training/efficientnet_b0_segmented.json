@@ -1,0 +1,8 @@
+{
+  "extends": "base.json",
+  "experiment_name": "efficientnet_b0_segmented",
+  "dataset_variant": "segmented",
+  "model_name": "efficientnet_b0",
+  "output_dir": "artifacts/models/efficientnet_b0_segmented",
+  "report_dir": "artifacts/reports/efficientnet_b0_segmented"
+}

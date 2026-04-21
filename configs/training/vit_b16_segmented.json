@@ -1,0 +1,8 @@
+{
+  "extends": "base.json",
+  "experiment_name": "vit_b16_segmented",
+  "dataset_variant": "segmented",
+  "model_name": "vit_b16",
+  "output_dir": "artifacts/models/vit_b16_segmented",
+  "report_dir": "artifacts/reports/vit_b16_segmented"
+}

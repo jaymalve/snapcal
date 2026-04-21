@@ -1,0 +1,8 @@
+{
+  "extends": "base.json",
+  "experiment_name": "resnet50_segmented",
+  "dataset_variant": "segmented",
+  "model_name": "resnet50",
+  "output_dir": "artifacts/models/resnet50_segmented",
+  "report_dir": "artifacts/reports/resnet50_segmented"
+}

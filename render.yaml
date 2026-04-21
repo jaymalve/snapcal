@@ -1,0 +1,32 @@
+databases:
+  - name: snapcal-db
+    plan: free
+    databaseName: snapcal
+    user: snapcal
+
+services:
+  - type: web
+    name: snapcal-api
+    runtime: python
+    plan: starter
+    buildCommand: ./build.sh
+    startCommand: cd apps/api && python -m gunicorn snapcal_api.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-10000}
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: snapcal-db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: SNAPCAL_MODEL_BUNDLE
+        value: artifacts/models/production_bundle
+      - key: SNAPCAL_MODEL_BUNDLE_URL
+        value: ""
+      - key: SNAPCAL_ENABLE_SEGMENTATION
+        value: "true"
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://your-app.vercel.app
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://your-app.vercel.app
