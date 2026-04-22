@@ -26,3 +26,5 @@ artifacts/reports/
 artifacts/cache/
 apps/api/db.sqlite3
 apps/api/media/
+artifacts/
+data/

@@ -15,6 +15,7 @@ from .constants import FOOD101_CLASSES
 from .datasets import Food101ManifestDataset
 from .evaluation import save_report, summarize_predictions
 from .models import build_image_transforms, build_model, extract_logits
+from .torch_utils import device_supports_pin_memory, resolve_torch_device
 
 
 def seed_everything(seed: int) -> None:
@@ -41,12 +42,12 @@ class Trainer:
         self.config = config
 
     def _device(self):
-        import torch
-
-        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        return resolve_torch_device()
 
     def _build_loaders(self):
         from torch.utils.data import DataLoader
+
+        device = self._device()
 
         train_dataset = Food101ManifestDataset(
             manifest_path=self.config.train_manifest,
@@ -69,7 +70,7 @@ class Trainer:
         loader_kwargs = {
             "batch_size": self.config.batch_size,
             "num_workers": self.config.num_workers,
-            "pin_memory": True,
+            "pin_memory": device_supports_pin_memory(device),
         }
         train_loader = DataLoader(train_dataset, shuffle=True, **loader_kwargs)
         val_loader = DataLoader(val_dataset, shuffle=False, **loader_kwargs)

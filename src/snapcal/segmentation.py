@@ -12,6 +12,7 @@ import numpy as np
 from PIL import Image
 
 from .config import SegmentationConfig
+from .torch_utils import resolve_torch_device
 
 
 @dataclass
@@ -205,7 +206,7 @@ class MobileSAMSegmenter:
         except ImportError as exc:  # pragma: no cover - depends on optional dependency
             raise RuntimeError("mobile-sam is not installed. Install snapcal[train] to enable segmentation.") from exc
 
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self._device = resolve_torch_device()
         print(f"Loading MobileSAM on device: {self._device}")
         sam = sam_model_registry[self.config.model_type](checkpoint=str(self.config.checkpoint_path))
         sam.to(device=self._device)
