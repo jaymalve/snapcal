@@ -1,102 +1,102 @@
 food101_class,usda_food_name,fdc_id,serving_size_g,serving_unit,calories_kcal,protein_g,carbs_g,fat_g,mapping_confidence,notes
-apple_pie,Apple Pie,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+apple_pie,"Pie, apple, prepared from recipe",175012,155,"piece (1/8 of 9"" dia)",410.75,3.72,57.51,19.38,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Pie, apple, prepared from recipe"
 baby_back_ribs,Baby Back Ribs,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-baklava,Baklava,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+baklava,Baklava,2708044,80,piece,352,5.26,30.04,23.47,auto_clean_match,Auto-filled from USDA survey_fndds_food: Baklava
 beef_carpaccio,Beef Carpaccio,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-beef_tartare,Beef Tartare,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+beef_tartare,Steak tartare,2706394,225,cup,486,39.26,0.77,35.1,auto_clean_match,Auto-filled from USDA survey_fndds_food: Steak tartare
 beet_salad,Beet Salad,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
 beignets,Beignets,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-bibimbap,Bibimbap,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-bread_pudding,Bread Pudding,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-breakfast_burrito,Breakfast Burrito,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-bruschetta,Bruschetta,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-caesar_salad,Caesar Salad,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+bibimbap,"Bibimbap, Korean",2708950,162,cup,123.12,8.91,13.14,3.95,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Bibimbap, Korean"
+bread_pudding,"Pudding, bread",2705680,200,cup,312,11.2,47.06,9.72,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Pudding, bread"
+breakfast_burrito,"Fast foods, breakfast burrito, with egg, cheese, and sausage",170787,109,burrito,301.93,12.1,25.04,17.04,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Fast foods, breakfast burrito, with egg, cheese, and sausage"
+bruschetta,Bruschetta,2707652,32,small or thin/very thin slice,54.72,1.37,6.82,2.44,auto_clean_match,Auto-filled from USDA survey_fndds_food: Bruschetta
+caesar_salad,"Caesar salad, with romaine, no dressing",2709591,79,cup,60.83,3.16,5.92,2.69,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Caesar salad, with romaine, no dressing"
 cannoli,Cannoli,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-caprese_salad,Caprese Salad,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-carrot_cake,Carrot Cake,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-ceviche,Ceviche,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+caprese_salad,"Mozzarella cheese, tomato, and basil, with oil and vinegar dressing",2705818,160,cup,222.4,11.47,6.18,17.39,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Mozzarella cheese, tomato, and basil, with oil and vinegar dressing"
+carrot_cake,"Cake or cupcake, carrot",2707859,200,"piece/slice, any size",748,4.98,103.6,35.04,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Cake or cupcake, carrot"
+ceviche,Ceviche,2706463,250,cup,157.5,26.32,8.95,1.9,auto_clean_match,Auto-filled from USDA survey_fndds_food: Ceviche
 cheese_plate,Cheese Plate,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-cheesecake,Cheesecake,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-chicken_curry,Chicken Curry,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-chicken_quesadilla,Chicken Quesadilla,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-chicken_wings,Chicken Wings,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-chocolate_cake,Chocolate Cake,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-chocolate_mousse,Chocolate Mousse,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-churros,Churros,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-clam_chowder,Clam Chowder,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-club_sandwich,Club Sandwich,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-crab_cakes,Crab Cakes,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-creme_brulee,Creme Brulee,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+cheesecake,"Cheesecake, plain",2707861,175,"piece/slice, any size",698.25,9.26,60.94,46.41,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Cheesecake, plain"
+chicken_curry,Chicken curry,2706437,240,cup,256.8,15.55,15.7,15.55,auto_clean_match,Auto-filled from USDA survey_fndds_food: Chicken curry
+chicken_quesadilla,"Quesadilla, chicken",2708593,35,triangular piece,100.45,5.06,9.56,4.55,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Quesadilla, chicken"
+chicken_wings,"Chicken ""wings"", plain, from precooked",2706075,22,drummette,64.68,4.1,1.57,4.53,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Chicken ""wings"", plain, from precooked"
+chocolate_cake,"Cake or cupcake, chocolate with chocolate icing, bakery",2707866,90,regular cupcake,310.5,2.96,47.02,13.68,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Cake or cupcake, chocolate with chocolate icing, bakery"
+chocolate_mousse,"Pie, chocolate mousse, prepared from mix, no-bake type",175015,95,"piece (1/8 of 9"" dia)",247,3.32,28.12,14.63,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Pie, chocolate mousse, prepared from mix, no-bake type"
+churros,Churros,2708070,45,regular,188.55,2.72,21.99,9.99,auto_clean_match,Auto-filled from USDA survey_fndds_food: Churros
+clam_chowder,"Soup, Manhattan clam chowder",2707138,245,cup,85.75,6.08,12.89,1.25,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Soup, Manhattan clam chowder"
+club_sandwich,Club sandwich on white,2706993,130,"sandwich, any size",288.6,19.6,30.02,9.72,auto_clean_match,Auto-filled from USDA survey_fndds_food: Club sandwich on white
+crab_cakes,"Crustaceans, crab, blue, crab cakes, home recipe",171967,60,cake,93,12.13,0.29,4.51,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Crustaceans, crab, blue, crab cakes, home recipe"
+creme_brulee,Creme brulee,2705684,260,cup,293.8,10.56,46.41,7.36,auto_clean_match,Auto-filled from USDA survey_fndds_food: Creme brulee
 croque_madame,Croque Madame,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-cup_cakes,Cup Cakes,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-deviled_eggs,Deviled Eggs,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-donuts,Donuts,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+cup_cakes,"Cake or cupcake, NFS",2707853,175,"piece/slice, any size",616,4.97,93.8,25.85,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Cake or cupcake, NFS"
+deviled_eggs,"Egg, deviled",2707181,30,egg,59.4,3.46,0.32,4.77,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Egg, deviled"
+donuts,"Doughnut, NFS",2708062,60,cup,255.6,3.31,29.71,13.72,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Doughnut, NFS"
 dumplings,Dumplings,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-edamame,Edamame,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-eggs_benedict,Eggs Benedict,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+edamame,"Edamame, cooked",2707436,160,cup,224,18.46,13.81,12.13,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Edamame, cooked"
+eggs_benedict,"Egg, Benedict",2707180,155,egg,446.4,21.41,13.14,34.26,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Egg, Benedict"
 escargots,Escargots,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-falafel,Falafel,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-filet_mignon,Filet Mignon,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+falafel,Falafel,2707408,17,patty,87.38,1.41,4.92,7,auto_clean_match,Auto-filled from USDA survey_fndds_food: Falafel
+filet_mignon,"Beef, tenderloin, steak, separable lean only, trimmed to 1/8"" fat, choice, cooked, broiled",173117,453.6,lb,934.42,131.59,0,41.28,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Beef, tenderloin, steak, separable lean only, trimmed to 1/8"" fat, choice, cooked, broiled"
 fish_and_chips,Fish and Chips,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-foie_gras,Foie Gras,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-french_fries,French Fries,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-french_onion_soup,French Onion Soup,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-french_toast,French Toast,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-fried_calamari,Fried Calamari,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-fried_rice,Fried Rice,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-frozen_yogurt,Frozen Yogurt,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-garlic_bread,Garlic Bread,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-gnocchi,Gnocchi,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-greek_salad,Greek Salad,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-grilled_cheese_sandwich,Grilled Cheese Sandwich,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-grilled_salmon,Grilled Salmon,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-guacamole,Guacamole,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+foie_gras,"Pate de foie gras, canned (goose liver pate), smoked",171100,28.35,oz,130.98,3.23,1.32,12.43,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Pate de foie gras, canned (goose liver pate), smoked"
+french_fries,"Potato, french fries, NFS",2709456,60,cup,135,1.5,13.94,8.44,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Potato, french fries, NFS"
+french_onion_soup,"Soup, French onion",2710108,245,cup,264.6,13.35,29.01,10.95,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Soup, French onion"
+french_toast,"French toast, NFS",2708331,65,"slice, any size",177.45,6.73,21.02,7.4,auto_clean_match,"Auto-filled from USDA survey_fndds_food: French toast, NFS"
+fried_calamari,"Calamari, fried",2706334,135,cup,315.9,18.58,18.98,17.85,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Calamari, fried"
+fried_rice,"Rice, fried, NFS",2708952,198,cup,344.52,7.6,64.35,6.32,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Rice, fried, NFS"
+frozen_yogurt,"Frozen yogurt, NFS",2705451,480,large ice cream cup,609.6,14.4,103.68,17.28,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Frozen yogurt, NFS"
+garlic_bread,"Garlic bread, NFS",2707626,41,piece/slice Texas Toast,143.09,3.42,17.07,6.8,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Garlic bread, NFS"
+gnocchi,"Gnocchi, potato",2708722,26,piece,35.1,0.63,4.47,1.65,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Gnocchi, potato"
+greek_salad,"Greek Salad, no dressing",2709830,105,cup,50.4,2.89,4.57,2.37,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Greek Salad, no dressing"
+grilled_cheese_sandwich,"Grilled cheese sandwich, NFS",2705801,116,sandwich,397.88,12.79,32.58,24.1,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Grilled cheese sandwich, NFS"
+grilled_salmon,"Fish, salmon, grilled",2706287,210,large fillet,543.9,54.43,0,34.61,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Fish, salmon, grilled"
+guacamole,"Guacamole, NFS",2709307,70,individual container,108.5,1.36,5.91,9.93,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Guacamole, NFS"
 gyoza,Gyoza,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-hamburger,Hamburger,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-hot_and_sour_soup,Hot and Sour Soup,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-hot_dog,Hot Dog,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-huevos_rancheros,Huevos Rancheros,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-hummus,Hummus,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-ice_cream,Ice Cream,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-lasagna,Lasagna,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+hamburger,"Hamburger, NFS",2706920,145,hamburger,417.6,25.39,29.99,20.85,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Hamburger, NFS"
+hot_and_sour_soup,"Soup, hot and sour",2707136,245,cup,95.55,6.32,10.66,2.96,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Soup, hot and sour"
+hot_dog,"Hot dog, NFS",2706166,150,"cup, sliced",465,17.55,4.33,42,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Hot dog, NFS"
+huevos_rancheros,Huevos rancheros,2707191,135,cup,163.35,9.02,11.95,8.98,auto_clean_match,Auto-filled from USDA survey_fndds_food: Huevos rancheros
+hummus,"Hummus, plain",2707402,70,individual container,170.1,5.14,10.43,11.97,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Hummus, plain"
+ice_cream,"Ice cream, NFS",2705629,120,small ice cream cup,265.2,4.28,31.63,13.56,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Ice cream, NFS"
+lasagna,Lasagna with meat,2708750,206,"piece (1/6 of 8"" square, approx 2-1/2"" x 4"")",286.34,15.35,33.31,10.24,auto_clean_match,Auto-filled from USDA survey_fndds_food: Lasagna with meat
 lobster_bisque,Lobster Bisque,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
 lobster_roll_sandwich,Lobster Roll Sandwich,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-macaroni_and_cheese,Macaroni and Cheese,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+macaroni_and_cheese,"Macaroni and cheese, box mix with cheese sauce, prepared",169770,189,cup prepared,309.96,12.63,43.66,9.43,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Macaroni and cheese, box mix with cheese sauce, prepared"
 macarons,Macarons,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-miso_soup,Miso Soup,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-mussels,Mussels,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-nachos,Nachos,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-omelette,Omelette,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-onion_rings,Onion Rings,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+miso_soup,"Soup, miso or tofu",2707455,245,cup,58.8,5.41,5.63,2.08,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Soup, miso or tofu"
+mussels,Mussels,2706350,135,cup,147.15,20.33,6.3,3.83,auto_clean_match,Auto-filled from USDA survey_fndds_food: Mussels
+nachos,"Nachos, NFS",2708576,135,cup,357.75,10.26,32.2,21.4,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Nachos, NFS"
+omelette,"Egg, whole, cooked, omelet",172185,61,large,93.94,6.45,0.39,7.11,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Egg, whole, cooked, omelet"
+onion_rings,Fried onion rings,2710055,50,cup,176,2.1,19.97,9.91,auto_clean_match,Auto-filled from USDA survey_fndds_food: Fried onion rings
 oysters,Oysters,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-pad_thai,Pad Thai,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-paella,Paella,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-pancakes,Pancakes,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+pad_thai,"Pad Thai, NFS",2708804,200,cup,308,16.26,28.72,15,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Pad Thai, NFS"
+paella,"Paella, NFS",2706723,240,cup,405.6,22.87,37.85,17.21,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Paella, NFS"
+pancakes,"Pancakes, NFS",2708294,90,large pancake,253.8,6.67,31.79,10.86,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Pancakes, NFS"
 panna_cotta,Panna Cotta,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-peking_duck,Peking Duck,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+peking_duck,"Duck, Peking",2706141,140,"cup, diced, cooked",215.6,7.45,9.06,16.46,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Duck, Peking"
 pho,Pho,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-pizza,Pizza,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-pork_chop,Pork Chop,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+pizza,"Pizza, cheese, from restaurant or fast food, medium crust",2708616,80,"piece, small pizza",212.8,9.11,26.66,7.75,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Pizza, cheese, from restaurant or fast food, medium crust"
+pork_chop,"Pork, chop, lean and fat eaten",2705867,120,regular,234,32.36,0.01,11,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Pork, chop, lean and fat eaten"
 poutine,Poutine,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-prime_rib,Prime Rib,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-pulled_pork_sandwich,Pulled Pork Sandwich,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-ramen,Ramen,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-ravioli,Ravioli,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-red_velvet_cake,Red Velvet Cake,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+prime_rib,"Beef, rib, whole (ribs 6-12), separable lean and fat, trimmed to 1/8"" fat, prime, cooked, roasted",168679,278,"piece, cooked, excluding refuse (yield from 1 lb raw meat with refuse)",1112,62.74,0,93.69,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Beef, rib, whole (ribs 6-12), separable lean and fat, trimmed to 1/8"" fat, prime, cooked, roasted"
+pulled_pork_sandwich,"Barbecue pork sandwich, on white bun",2706975,180,regular sandwich,437.4,26.95,44.75,15.89,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Barbecue pork sandwich, on white bun"
+ramen,"Ramen bowl, NFS",2709153,245,cup,311.15,17.47,34.18,11.2,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Ramen bowl, NFS"
+ravioli,"Ravioli, meat-filled, no sauce",2708763,160,cup,304,20.14,28.32,11.87,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Ravioli, meat-filled, no sauce"
+red_velvet_cake,"Cake or cupcake, red velvet",2707884,200,"piece/slice, any size",710,5.58,108.72,29.16,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Cake or cupcake, red velvet"
 risotto,Risotto,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-samosa,Samosa,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+samosa,Samosa,2708730,100,regular/large,310,5.14,33.16,17.47,auto_clean_match,Auto-filled from USDA survey_fndds_food: Samosa
 sashimi,Sashimi,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
 scallops,Scallops,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
 seaweed_salad,Seaweed Salad,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
 shrimp_and_grits,Shrimp and Grits,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-spaghetti_bolognese,Spaghetti Bolognese,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+spaghetti_bolognese,"Restaurant, Italian, spaghetti with meat sauce",167680,554,serving,670.34,32.08,90.86,19.89,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Restaurant, Italian, spaghetti with meat sauce"
 spaghetti_carbonara,Spaghetti Carbonara,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
 spring_rolls,Spring Rolls,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-steak,Steak,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-strawberry_shortcake,Strawberry Shortcake,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-sushi,Sushi,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-tacos,Tacos,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+steak,"Beef, steak, NFS",2705824,160,regular,366.4,43.2,0,20.61,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Beef, steak, NFS"
+strawberry_shortcake,"Cake, strawberry shortcake",2707896,175,"piece/slice, any size",374.5,5.79,70.16,8.28,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Cake, strawberry shortcake"
+sushi,"Sushi, NFS",2708959,30,piece,28.2,0.88,5.52,0.2,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Sushi, NFS"
+tacos,"Taco, NFS",2708514,160,large,393.6,24.5,24.99,21.7,auto_clean_match,"Auto-filled from USDA survey_fndds_food: Taco, NFS"
 takoyaki,Takoyaki,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-tiramisu,Tiramisu,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+tiramisu,Tiramisu,2705702,175,piece,617.75,9.89,51.52,41.75,auto_clean_match,Auto-filled from USDA survey_fndds_food: Tiramisu
 tuna_tartare,Tuna Tartare,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
-waffles,Waffles,,,serving,,,,,pending_manual_curation,Replace with curated USDA FoodData Central row
+waffles,"Waffles, plain, prepared from recipe",175039,75,"waffle, round (7"" dia)",218.25,5.93,24.67,10.57,auto_clean_match,"Auto-filled from USDA sr_legacy_food: Waffles, plain, prepared from recipe"

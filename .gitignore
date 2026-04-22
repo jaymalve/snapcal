@@ -28,3 +28,6 @@ apps/api/db.sqlite3
 apps/api/media/
 artifacts/
 data/
+
+# just a script to prefill the food101_usda_mapping.csv file
+prefill_food101_usda_mapping.py 
