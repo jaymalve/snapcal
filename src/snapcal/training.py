@@ -94,7 +94,9 @@ class Trainer:
         start_epoch = 0
         checkpoint_path = self.config.output_dir / "last.pt"
         if checkpoint_path.exists():
-            checkpoint = torch.load(checkpoint_path, map_location=device)
+            # These are trusted checkpoints produced by this project and include
+            # non-tensor metadata such as pathlib paths in the saved config.
+            checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
             model.load_state_dict(checkpoint["model_state"])
             optimizer.load_state_dict(checkpoint["optimizer_state"])
             scheduler.load_state_dict(checkpoint["scheduler_state"])
@@ -181,7 +183,7 @@ class Trainer:
             if val_report.top1_accuracy >= best_val:
                 best_val = val_report.top1_accuracy
                 torch.save(checkpoint, best_checkpoint_path)
-        best_checkpoint = torch.load(best_checkpoint_path, map_location=device)
+        best_checkpoint = torch.load(best_checkpoint_path, map_location=device, weights_only=False)
         model.load_state_dict(best_checkpoint["model_state"])
         test_report, predictions_payload = self.evaluate_loader(model, test_loader, device)
         report_path = self.config.report_dir / "test_report.json"
