@@ -53,8 +53,7 @@ export SNAPCAL_MODEL_BUNDLE=artifacts/models/production_bundle
 export SNAPCAL_ENABLE_SEGMENTATION=false
 export DJANGO_DEBUG=true
 export DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
-export CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-export CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+export CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001
 python apps/api/manage.py migrate
 python apps/api/manage.py runserver
 ```

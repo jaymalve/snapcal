@@ -115,30 +115,16 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-_cors_default = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001"
-# Common Next.js dev ports; merged in DEBUG so a .env that only lists :3000 still allows :3001, etc.
-_local_dev_origins = {
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
-}
+# Any browser origin may call the API (open CORS). Use with CORS_ALLOW_CREDENTIALS=False unless you
+# have a specific origin allowlist and trust model; see django-cors-headers docs.
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = False
 
-cors_allowed_origins = set(_env_list("CORS_ALLOWED_ORIGINS", _cors_default))
-if DEBUG:
-    cors_allowed_origins |= _local_dev_origins
-
-csrf_trusted_origins = set(
-    _env_list("CSRF_TRUSTED_ORIGINS", _cors_default)
-)
-if DEBUG:
-    csrf_trusted_origins |= _local_dev_origins
+_csrf_default = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001"
+csrf_trusted_origins = set(_env_list("CSRF_TRUSTED_ORIGINS", _csrf_default))
 if render_external_url:
     csrf_trusted_origins.add(render_external_url)
-
-CORS_ALLOWED_ORIGINS = sorted(cors_allowed_origins)
 CSRF_TRUSTED_ORIGINS = sorted(csrf_trusted_origins)
-CORS_ALLOW_CREDENTIALS = False
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 SESSION_COOKIE_SECURE = not DEBUG

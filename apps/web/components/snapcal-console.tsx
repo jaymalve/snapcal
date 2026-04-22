@@ -1,31 +1,23 @@
 "use client";
 
+import Image from "next/image";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
 type NutritionFacts = {
-  serving_size_g: number | null;
-  serving_unit: string;
   calories_kcal: number | null;
-  protein_g: number | null;
-  carbs_g: number | null;
-  fat_g: number | null;
 };
 
 type ClassPrediction = {
   class_name: string;
-  confidence: number;
-  nutrition_per_serving: NutritionFacts;
   nutrition_adjusted: NutritionFacts;
 };
 
 type PredictionResponse = {
   selected_class: string;
   top_predictions: ClassPrediction[];
-  portion_multiplier: number;
-  model_version: string;
-  segmentation_preview_url?: string | null;
-  latency_ms?: Record<string, number>;
-  warnings?: string[];
+  latency_ms?: {
+    total?: number;
+  };
 };
 
 const API_BASE_URL =
@@ -35,17 +27,23 @@ function formatLabel(value: string) {
   return value.replaceAll("_", " ");
 }
 
-function formatNumber(value: number | null, suffix = "") {
+function capitalizeFirstLetter(value: string) {
+  if (!value) {
+    return value;
+  }
+  return value[0].toUpperCase() + value.slice(1);
+}
+
+function formatCalories(value: number | null) {
   if (value === null || Number.isNaN(value)) {
     return "N/A";
   }
-  return `${value.toFixed(1)}${suffix}`;
+  return `${Math.round(value)} kcal`;
 }
 
 export function SnapCalConsole() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [portionMultiplier, setPortionMultiplier] = useState("1.0");
   const [result, setResult] = useState<PredictionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,10 +72,11 @@ export function SnapCalConsole() {
       return;
     }
     setIsSubmitting(true);
+    setResult(null);
     setError(null);
     const formData = new FormData();
     formData.append("image", file);
-    formData.append("portion_multiplier", portionMultiplier);
+    formData.append("portion_multiplier", "1.0");
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/predict`, {
@@ -106,6 +105,17 @@ export function SnapCalConsole() {
   }
 
   const primaryPrediction = result?.top_predictions?.[0] ?? null;
+  const detectedMeal = primaryPrediction
+    ? capitalizeFirstLetter(formatLabel(primaryPrediction.class_name))
+    : result
+      ? capitalizeFirstLetter(formatLabel(result.selected_class))
+      : null;
+  const estimatedCalories = primaryPrediction
+    ? formatCalories(primaryPrediction.nutrition_adjusted.calories_kcal)
+    : "N/A";
+  const latencyText = result?.latency_ms?.total
+    ? `Fetched in ${result.latency_ms.total.toFixed(0)}ms.`
+    : null;
 
   return (
     <main className="page-shell">
@@ -113,10 +123,9 @@ export function SnapCalConsole() {
         <span className="eyebrow">SAM-guided meal intelligence</span>
         <h1 className="headline">Segment the plate. Classify the meal. Estimate the calories.</h1>
         <p className="lede">
-          SnapCal pairs MobileSAM food isolation with transformer-based
-          classification and a USDA-backed nutrition layer. Upload a photo,
-          adjust portion size, and inspect the top-3 predictions with calorie
-          and macro estimates.
+          SnapCal isolates the meal, classifies it, and returns a calorie
+          estimate from a single photo. Upload a meal and run inference to see
+          the detected dish directly on the image.
         </p>
       </section>
 
@@ -126,9 +135,16 @@ export function SnapCalConsole() {
             <label className="label" htmlFor="image-upload">
               Meal photo
             </label>
-            <div className="dropzone">
+            <div className={`dropzone${previewUrl ? " dropzone-filled" : ""}`}>
               {previewUrl ? (
-                <img src={previewUrl} alt="Selected meal preview" />
+                <Image
+                  className="dropzone-image"
+                  src={previewUrl}
+                  alt="Selected meal preview"
+                  fill
+                  unoptimized
+                  sizes="(max-width: 768px) 100vw, 760px"
+                />
               ) : (
                 <div className="dropzone-empty">
                   <strong>Upload a photo or open the camera.</strong>
@@ -138,6 +154,21 @@ export function SnapCalConsole() {
                   </p>
                 </div>
               )}
+
+              {previewUrl && result ? (
+                <>
+                  <div className="dropzone-scrim" aria-hidden="true" />
+                  <div className="result-drawer">
+                    <p className="result-line">
+                      Detected meal: <span className="result-emphasis">{detectedMeal}</span>
+                    </p>
+                    <p className="result-line">
+                      Estimated Calories: <span className="result-emphasis">{estimatedCalories}</span>
+                    </p>
+                    {latencyText ? <p className="result-muted">{latencyText}</p> : null}
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
 
@@ -150,96 +181,12 @@ export function SnapCalConsole() {
               capture="environment"
               onChange={onFileChange}
             />
-
-            <div className="field-row">
-              <input
-                className="input"
-                type="number"
-                min="0.01"
-                step="0.05"
-                value={portionMultiplier}
-                onChange={(event) => setPortionMultiplier(event.target.value)}
-                placeholder="Portion multiplier"
-              />
-              <button className="button" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Analyzing..." : "Run SnapCal"}
-              </button>
-            </div>
+            <button className="button" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Analyzing..." : "Run SnapCal"}
+            </button>
           </div>
-        </form>
-
-        <aside className="panel results-panel">
-          <div className="metric-strip">
-            <article className="metric-card">
-              <p className="metric-label">Selected class</p>
-              <p className="metric-value">
-                {result ? formatLabel(result.selected_class) : "Waiting"}
-              </p>
-            </article>
-            <article className="metric-card">
-              <p className="metric-label">Calories</p>
-              <p className="metric-value">
-                {primaryPrediction
-                  ? formatNumber(
-                      primaryPrediction.nutrition_adjusted.calories_kcal,
-                      " kcal",
-                    )
-                  : "N/A"}
-              </p>
-            </article>
-            <article className="metric-card">
-              <p className="metric-label">Latency</p>
-              <p className="metric-value">
-                {result?.latency_ms?.total
-                  ? `${result.latency_ms.total.toFixed(0)} ms`
-                  : "N/A"}
-              </p>
-            </article>
-          </div>
-
           {error ? <p className="warning-line">{error}</p> : null}
-
-          <div className="prediction-list">
-            {(result?.top_predictions ?? []).map((prediction) => (
-              <article className="prediction-card" key={prediction.class_name}>
-                <div className="prediction-header">
-                  <h2 className="prediction-name">
-                    {formatLabel(prediction.class_name)}
-                  </h2>
-                  <span className="prediction-confidence">
-                    {(prediction.confidence * 100).toFixed(1)}%
-                  </span>
-                </div>
-                <p className="nutrition-line">
-                  Per serving:{" "}
-                  {formatNumber(prediction.nutrition_per_serving.calories_kcal, " kcal")}
-                  {" • "}
-                  {formatNumber(prediction.nutrition_per_serving.protein_g, "g protein")}
-                  {" • "}
-                  {formatNumber(prediction.nutrition_per_serving.carbs_g, "g carbs")}
-                  {" • "}
-                  {formatNumber(prediction.nutrition_per_serving.fat_g, "g fat")}
-                </p>
-                <p className="nutrition-line">
-                  Adjusted:{" "}
-                  {formatNumber(prediction.nutrition_adjusted.calories_kcal, " kcal")}
-                  {" • "}
-                  {formatNumber(prediction.nutrition_adjusted.protein_g, "g protein")}
-                  {" • "}
-                  {formatNumber(prediction.nutrition_adjusted.carbs_g, "g carbs")}
-                  {" • "}
-                  {formatNumber(prediction.nutrition_adjusted.fat_g, "g fat")}
-                </p>
-              </article>
-            ))}
-          </div>
-
-          {(result?.warnings ?? []).map((warning) => (
-            <p className="warning-line" key={warning}>
-              {warning}
-            </p>
-          ))}
-        </aside>
+        </form>
       </section>
     </main>
   );

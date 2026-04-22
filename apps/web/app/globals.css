@@ -84,9 +84,8 @@ input {
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 20px;
+  width: min(100%, 760px);
+  margin: 0 auto;
 }
 
 .panel {
@@ -105,13 +104,6 @@ input {
   padding: 28px;
 }
 
-.results-panel {
-  padding: 24px;
-  display: grid;
-  gap: 16px;
-  align-content: start;
-}
-
 .stack {
   display: grid;
   gap: 16px;
@@ -127,6 +119,7 @@ input {
 }
 
 .dropzone {
+  position: relative;
   display: grid;
   place-items: center;
   min-height: 280px;
@@ -136,29 +129,49 @@ input {
     linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.18)),
     rgba(255, 255, 255, 0.36);
   overflow: hidden;
+  isolation: isolate;
 }
 
-.dropzone img {
-  width: 100%;
-  height: 100%;
+.dropzone-filled {
+  min-height: 420px;
+  border-style: solid;
+  border-color: rgba(31, 43, 34, 0.1);
+}
+
+.dropzone-image {
+  z-index: 0;
   object-fit: cover;
 }
 
+.dropzone-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 0.35) 78%,
+    rgba(0, 0, 0, 0.78) 100%
+  );
+}
+
 .dropzone-empty {
+  position: relative;
+  z-index: 1;
   padding: 32px;
   text-align: center;
   color: var(--muted);
+  max-width: 36ch;
 }
 
 .controls {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
   gap: 14px;
-}
-
-.field-row {
-  display: grid;
-  grid-template-columns: 1fr 160px;
-  gap: 14px;
+  align-items: end;
 }
 
 .input,
@@ -192,94 +205,107 @@ input {
   opacity: 0.75;
 }
 
-.metric-strip {
+.result-drawer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 8px;
+  padding: 20px 22px 22px;
+  border-radius: 0 0 24px 24px;
+  z-index: 2;
 }
 
-.metric-card {
-  padding: 16px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(31, 43, 34, 0.08);
-}
-
-.metric-label {
-  margin: 0 0 8px;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-}
-
-.metric-value {
+.result-line {
   margin: 0;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 1rem;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.result-emphasis {
   font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  font-size: 1.8rem;
-}
-
-.prediction-list {
-  display: grid;
-  gap: 12px;
-}
-
-.prediction-card {
-  padding: 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(31, 43, 34, 0.08);
-  background: rgba(255, 255, 255, 0.68);
-}
-
-.prediction-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.prediction-name {
-  margin: 0;
+  font-size: 1.18rem;
   font-weight: 700;
-  text-transform: capitalize;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-.prediction-confidence {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.nutrition-line,
+.result-muted,
 .warning-line {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 0.95rem;
+  margin: 0;
+  font-size: 0.94rem;
   line-height: 1.45;
+}
+
+.result-muted {
+  color: rgba(255, 255, 255, 0.78);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .warning-line {
   color: #9a4d1f;
+  overflow-wrap: anywhere;
 }
 
-@media (max-width: 960px) {
-  .grid {
+@media (max-width: 768px) {
+  .page-shell {
+    padding: 32px 18px 56px;
+  }
+
+  .hero {
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .headline {
+    font-size: clamp(2.15rem, 11vw, 3.5rem);
+    line-height: 1;
+  }
+
+  .lede {
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+
+  .dropzone {
+    min-height: 220px;
+  }
+
+  .dropzone-filled {
+    min-height: 340px;
+  }
+
+  .controls {
     grid-template-columns: 1fr;
+  }
+
+  .button {
+    min-height: 52px;
   }
 }
 
 @media (max-width: 640px) {
   .page-shell {
-    padding: 28px 16px 48px;
+    padding: 24px 14px 40px;
   }
 
-  .field-row,
-  .metric-strip {
-    grid-template-columns: 1fr;
+  .dropzone {
+    min-height: 180px;
+    border-radius: 20px;
   }
 
-  .upload-panel,
-  .results-panel {
-    padding: 20px;
+  .dropzone-filled {
+    min-height: 280px;
+  }
+
+  .upload-panel {
+    padding: 18px;
+  }
+
+  .result-drawer {
+    padding: 16px 18px 18px;
+    border-radius: 0 0 20px 20px;
   }
 }

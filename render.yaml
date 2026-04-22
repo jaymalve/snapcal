@@ -26,7 +26,5 @@ services:
         value: ""
       - key: SNAPCAL_ENABLE_SEGMENTATION
         value: "true"
-      - key: CORS_ALLOWED_ORIGINS
-        value: https://your-app.vercel.app
       - key: CSRF_TRUSTED_ORIGINS
         value: https://your-app.vercel.app
