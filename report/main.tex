@@ -6,8 +6,12 @@
 
 \usepackage{booktabs}
 \usepackage{graphicx}
+\usepackage{microtype}
 \usepackage{tabularx}
 \usepackage{array}
+
+\setlength{\columnsep}{12pt}
+\setlength{\emergencystretch}{2em}
 
 \title[SnapCal Report]{SnapCal: SAM-Guided Food Recognition and Calorie Estimation from Meal Photographs}
 
@@ -89,7 +93,7 @@ SnapCal supported three pretrained classifier families:
 \item ViT-B/16 as the transformer-based model \cite{dosovitskiy2021vit}
 \end{itemize}
 
-The training pipeline was config-driven and loaded one of the three model families based on a JSON experiment file. For ResNet-50 and EfficientNet-B0, the classification head was replaced with a 101-class layer. For ViT-B/16, the Hugging Face Transformers implementation loaded the pretrained `google/vit-base-patch16-224-in21k` checkpoint and replaced the classifier head to match Food-101 labels \cite{transformers}.
+The training pipeline was config-driven and loaded one of the three model families based on a JSON experiment file. For ResNet-50 and EfficientNet-B0, the classification head was replaced with a 101-class layer. For ViT-B/16, the Hugging Face Transformers implementation loaded a pretrained ViT-B/16 checkpoint and replaced the classifier head to match Food-101 labels \cite{transformers}.
 
 \subsection{Training Procedure}
 The shared base training configuration used image size 224, batch size 64, 15 epochs, AdamW with learning rate $3 \times 10^{-4}$, weight decay 0.01, and label smoothing 0.1. The learning rate scheduler used cosine annealing. The training augmentations included random horizontal flip, random rotation up to 15 degrees, color jitter, and random erasing. A reduced local configuration was used for the verified full-dataset baseline reported in this paper; that run used batch size 16, 3 epochs, and zero data-loader workers to fit a self-contained local workflow. The same reduced training settings were also reused for the preliminary pilot ablation, but on the 808-image sampled manifest described above.
@@ -97,11 +101,13 @@ The shared base training configuration used image size 224, batch size 64, 15 ep
 Table~\ref{tab:training-config} summarizes the three configuration levels most relevant to this report.
 
 \begin{table}
-  \caption{Training configuration summary. The base configuration reflects the general project setup, the verified local baseline reflects the strongest full-dataset run in the repository, and the pilot column reflects the matched quick ablation used for the preliminary segmentation study.}
+  \caption{Training configuration summary for the base setup, the verified local baseline, and the matched pilot ablation.}
   \label{tab:training-config}
-  \begin{tabular}{lccc}
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}p{0.23\columnwidth}>{\centering\arraybackslash}p{0.16\columnwidth}>{\centering\arraybackslash}p{0.24\columnwidth}>{\centering\arraybackslash}p{0.23\columnwidth}@{}}
     \toprule
-    Setting & Base pipeline & Verified local baseline & Quick pilot ablation \\
+    Setting & Base & Verified & Pilot \\
     \midrule
     Model & Config-dependent & ResNet-50 & ResNet-50 \\
     Input variant & Raw or segmented & Raw & Raw and segmented \\
@@ -114,7 +120,7 @@ Table~\ref{tab:training-config} summarizes the three configuration levels most r
     Scheduler & Cosine annealing & Cosine annealing & Cosine annealing \\
     Label smoothing & 0.1 & 0.1 & 0.1 \\
     \bottomrule
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 For the pilot ablation, the segmentation stage used a faster local MobileSAM configuration with fewer prompt points and no crop-layer recursion so that preprocessing could finish within a single local work session. That speed-oriented setting is useful for a preliminary ablation, but it is not equivalent to a final full-dataset segmentation study.
@@ -130,7 +136,7 @@ The final system was implemented as a monorepo with four main layers:
 \begin{itemize}
 \item offline research scripts for manifest generation, segmentation, training, evaluation, and bundle export
 \item a shared Python package that contained datasets, model builders, evaluation utilities, segmentation helpers, and nutrition logic
-\item a Django REST backend that served `/api/v1/health` and `/api/v1/predict`
+\item a Django REST backend that served health and prediction endpoints
 \item a Next.js frontend that handled image upload, camera capture, result display, and portion-size adjustment
 \end{itemize}
 
@@ -152,7 +158,7 @@ Figure~\ref{fig:pipeline} shows the system pipeline at a high level.
 The evaluation pipeline computed top-1 accuracy, top-5 accuracy, macro F1, per-class precision, recall, and F1, as well as a full confusion matrix. These metrics were generated directly from saved top-$k$ predictions. For runtime evaluation, the inference service also reported preprocessing, inference, and total latency in milliseconds.
 
 \subsection{Verified Baseline Result}
-The strongest verified experiment present in the repository at the time of writing was a local raw-image ResNet-50 baseline stored under `artifacts/reports/resnet50_raw_local/test\_report.json`. That experiment achieved 84.8277\% top-1 accuracy, 97.0020\% top-5 accuracy, and 0.848108 macro F1 on the 25,250-image Food-101 test split.
+The strongest verified experiment present in the repository at the time of writing was the local raw-image ResNet-50 baseline report for the full-dataset raw run. That experiment achieved 84.8277\% top-1 accuracy, 97.0020\% top-5 accuracy, and 0.848108 macro F1 on the 25,250-image Food-101 test split.
 
 Table~\ref{tab:baseline-results} summarizes the verified baseline.
 
@@ -171,7 +177,7 @@ Table~\ref{tab:baseline-results} summarizes the verified baseline.
 This baseline was important for two reasons. First, it established that the training, evaluation, and export pipeline produced a competitive Food-101 model even before any segmented-input comparison was completed. Second, it provided a strong reference point for the overall quality of the raw-image classification pipeline. The top-1 result also landed close to the original project goal of 85\% accuracy, which suggested that the core classification pipeline was viable. Because the pilot ablation reported next uses a much smaller manifest, its results are analyzed separately rather than being compared directly to this full-dataset baseline.
 
 \subsection{Per-Class Behavior}
-Per-class F1 analysis showed that some categories were classified very reliably, while others remained difficult because of visual similarity across dishes. The five strongest classes in the verified baseline were `edamame` (0.992), `macarons` (0.970), `oysters` (0.952), `hot\_and\_sour\_soup` (0.950), and `miso\_soup` (0.945). The five weakest classes were `pork\_chop` (0.580), `steak` (0.618), `chocolate\_mousse` (0.660), `apple\_pie` (0.668), and `bread\_pudding` (0.687).
+Per-class F1 analysis showed that some categories were classified very reliably, while others remained difficult because of visual similarity across dishes. The five strongest classes in the verified baseline were edamame (0.992), macarons (0.970), oysters (0.952), hot and sour soup (0.950), and miso soup (0.945). The five weakest classes were pork chop (0.580), steak (0.618), chocolate mousse (0.660), apple pie (0.668), and bread pudding (0.687).
 
 Table~\ref{tab:perclass-extremes} summarizes these extremes.
 
@@ -200,7 +206,7 @@ Table~\ref{tab:perclass-extremes} summarizes these extremes.
 The lowest-performing classes matched common fine-grained failure modes. Several dishes shared similar plating styles, brown or cream color palettes, and overlapping textures. This pattern supports the original motivation for trying segmentation: when background clutter and plate context are reduced, borderline categories may become easier to separate.
 
 \subsection{Confusion Patterns}
-The confusion matrix highlighted several visually intuitive failure pairs. The largest confusions in the verified baseline included `pork\_chop \rightarrow steak` (34), `filet\_mignon \rightarrow steak` (34), `tuna\_tartare \rightarrow beef\_tartare` (33), `chocolate\_cake \rightarrow chocolate\_mousse` (31), and `steak \rightarrow filet\_mignon` (30). These errors were consistent with categories that share preparation style, texture, or dominant color.
+The confusion matrix highlighted several visually intuitive failure pairs. The largest confusions in the verified baseline included pork chop mistaken for steak (34), filet mignon mistaken for steak (34), tuna tartare mistaken for beef tartare (33), chocolate cake mistaken for chocolate mousse (31), and steak mistaken for filet mignon (30). These errors were consistent with categories that share preparation style, texture, or dominant color.
 
 \begin{table}
   \caption{Largest confusion pairs in the verified ResNet-50 raw baseline.}
@@ -246,15 +252,17 @@ Calorie mean absolute error remains future work. In addition to the incomplete F
 \begin{table}
   \caption{Current status of the calorie estimation evaluation path.}
   \label{tab:calorie-results}
-  \begin{tabular}{lp{0.5\linewidth}}
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}p{0.34\columnwidth}X@{}}
     \toprule
     Metric & Value \\
     \midrule
     Classes with populated USDA mapping & 74 / 101 \\
     Calorie MAE status & Deferred until mapping curation and evaluation protocol are finalized \\
-    Portion-scaling evaluation note & Implemented in the product workflow, but not yet benchmarked against external calorie labels \\
+    Portion-scaling evaluation note & Implemented in the product workflow; not yet benchmarked against external calorie labels \\
     \bottomrule
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \subsection{Latency and Deployment Notes}
@@ -302,8 +310,8 @@ The repository snapshot used for this report contained the following report-rele
 \item a canonical Food-101 manifest with 101,000 total rows
 \item completed segmentation code and configuration for MobileSAM preprocessing
 \item config-driven model support for ResNet-50, EfficientNet-B0, and ViT-B/16
-\item a verified local experiment report for `resnet50\_raw\_local`
-\item paired pilot reports for `resnet50\_raw\_quick\_ablation` and `resnet50\_segmented\_quick\_ablation`
+\item a verified local experiment report for the full-dataset raw ResNet-50 baseline
+\item paired pilot reports for the reduced-manifest raw and segmented ResNet-50 ablation
 \item an exported production bundle for backend inference
 \item a Django API and Next.js frontend wired for image-based inference
 \end{itemize}
