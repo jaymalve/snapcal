@@ -30,6 +30,7 @@ class PredictView(APIView):
         serializer = PredictRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         image_file = serializer.validated_data["image"]
+        enable_segmentation = bool(serializer.validated_data["enable_segmentation"])
         portion_unit = str(serializer.validated_data["portion_unit"])
         portion_value = serializer.validated_data.get("portion_value")
         try:
@@ -37,6 +38,7 @@ class PredictView(APIView):
                 image_bytes=image_file.read(),
                 portion_unit=portion_unit,
                 portion_value=portion_value,
+                enable_segmentation=enable_segmentation,
             )
         except InferenceNotReadyError as exc:
             return Response(

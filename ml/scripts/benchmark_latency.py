@@ -32,6 +32,7 @@ def parse_args() -> argparse.Namespace:
         default=PORTION_UNIT_SERVING,
     )
     parser.add_argument("--portion-value", type=int)
+    parser.add_argument("--enable-segmentation", action="store_true")
     return parser.parse_args()
 
 
@@ -56,10 +57,15 @@ def main() -> None:
         image_bytes=image_bytes,
         portion_unit=args.portion_unit,
         portion_value=args.portion_value,
+        enable_segmentation=args.enable_segmentation,
     )
     total_ms = (time.perf_counter() - start) * 1000.0
     print(f"Selected class: {response.selected_class}")
     print(f"Requested portion: {response.requested_portion.label}")
+    print(
+        "Processing mode: "
+        + ("segmented" if response.segmentation_applied else "raw")
+    )
     print(f"Reported latency: {response.latency_ms}")
     print(f"Measured wall time: {total_ms:.3f} ms")
 

@@ -38,11 +38,18 @@ class PredictionRuntime:
                 "error": str(exc),
             }
 
-    def predict(self, image_bytes: bytes, portion_unit: str, portion_value: Optional[int]):
+    def predict(
+        self,
+        image_bytes: bytes,
+        portion_unit: str,
+        portion_value: Optional[int],
+        enable_segmentation: bool,
+    ):
         return self._load_service().predict(
             image_bytes=image_bytes,
             portion_unit=portion_unit,
             portion_value=portion_value,
+            enable_segmentation=enable_segmentation,
         )
 
 

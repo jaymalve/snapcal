@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import importlib.util
 import io
 import json
 from pathlib import Path
@@ -90,18 +91,42 @@ class LocalInferenceService:
 
     def health(self) -> Dict[str, object]:
         ready = self.metadata.checkpoint_path.exists() and self.metadata.nutrition_mapping_path.exists()
+        segmentation_available, segmentation_reason = self._segmentation_status()
         return {
             "ready": ready,
             "model_version": self.metadata.model_version,
             "model_name": self.metadata.model_name,
             "bundle_dir": str(self.bundle_dir),
+            "segmentation_available": segmentation_available,
+            "segmentation_reason": segmentation_reason,
         }
+
+    def _segmentation_status(self) -> Tuple[bool, Optional[str]]:
+        if not self.enable_segmentation:
+            return (
+                False,
+                "Segmentation is disabled on this backend. Restart with SNAPCAL_ENABLE_SEGMENTATION=true to enable the comparison toggle.",
+            )
+        if self.metadata.segmentation_config_path is None:
+            return False, "This bundle does not include a segmentation config."
+        if not self.metadata.segmentation_config_path.exists():
+            return False, f"Segmentation config not found: {self.metadata.segmentation_config_path}"
+        try:
+            config = SegmentationConfig.from_json(self.metadata.segmentation_config_path)
+        except Exception as exc:
+            return False, f"Segmentation config could not be loaded: {exc}"
+        if not config.checkpoint_path.exists():
+            return False, f"Segmentation checkpoint not found: {config.checkpoint_path}"
+        if importlib.util.find_spec("mobile_sam") is None:
+            return False, "MobileSAM is not installed on this backend."
+        return True, None
 
     def predict(
         self,
         image_bytes: bytes,
         portion_unit: str = "serving",
         portion_value: Optional[int] = None,
+        enable_segmentation: bool = False,
     ):
         try:
             import torch
@@ -110,17 +135,28 @@ class LocalInferenceService:
 
         model = self._load_model()
         warnings: List[str] = []
+        segmentation_requested = enable_segmentation
+        segmentation_applied = False
         preprocess_start = time.perf_counter()
         with Image.open(io.BytesIO(image_bytes)) as input_image:
             image = input_image.convert("RGB")
             segmentation_preview_url = None
-            segmenter = self._load_segmenter()
-            if segmenter is not None:
+            if enable_segmentation:
+                segmentation_available, segmentation_reason = self._segmentation_status()
+                if not segmentation_available:
+                    raise InferenceNotReadyError(segmentation_reason or "Segmentation is not available.")
+                try:
+                    segmenter = self._load_segmenter()
+                except Exception as exc:
+                    raise InferenceNotReadyError(f"Segmentation requested but could not be initialized: {exc}") from exc
+                if segmenter is None:
+                    raise InferenceNotReadyError("Segmentation was requested but could not be initialized.")
                 try:
                     segmented_image, _mask_image, _meta_json = segmenter.segment_image(image)
                     image = segmented_image
+                    segmentation_applied = True
                 except Exception as exc:  # pragma: no cover - optional dependency path
-                    warnings.append(f"Segmentation skipped: {exc}")
+                    raise InferenceNotReadyError(f"Segmentation requested but failed: {exc}") from exc
             tensor = self.transform(image).unsqueeze(0)
         preprocess_ms = (time.perf_counter() - preprocess_start) * 1000.0
         inference_start = time.perf_counter()
@@ -140,6 +176,8 @@ class LocalInferenceService:
             requested_portion_unit=portion_unit,
             requested_portion_value=portion_value,
             model_version=self.metadata.model_version,
+            segmentation_requested=segmentation_requested,
+            segmentation_applied=segmentation_applied,
             segmentation_preview_url=segmentation_preview_url,
             latency_ms={
                 "preprocess": round(preprocess_ms, 3),

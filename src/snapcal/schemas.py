@@ -57,6 +57,8 @@ class PredictionResponse:
     top_predictions: List[ClassPrediction]
     requested_portion: RequestedPortion
     model_version: str
+    segmentation_requested: bool = False
+    segmentation_applied: bool = False
     segmentation_preview_url: Optional[str] = None
     latency_ms: Dict[str, float] = field(default_factory=dict)
     warnings: List[str] = field(default_factory=list)

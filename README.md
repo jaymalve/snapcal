@@ -19,7 +19,7 @@ SnapCal is a monorepo for SAM-guided food recognition and calorie estimation fro
 - Model registry and training loop stubs for `resnet50`, `efficientnet_b0`, and `vit_b16`
 - Nutrition lookup and preset portion-selection utilities
 - Django REST endpoints for `/api/v1/health` and `/api/v1/predict`
-- Next.js upload UI wired to the API contract
+- Next.js upload UI wired to the API contract, including a request-level segmentation comparison toggle
 
 ## What Still Requires Local Setup
 

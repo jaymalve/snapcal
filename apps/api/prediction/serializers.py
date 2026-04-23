@@ -15,6 +15,7 @@ from snapcal.constants import (
 
 class PredictRequestSerializer(serializers.Serializer):
     image = serializers.ImageField()
+    enable_segmentation = serializers.BooleanField(default=False)
     portion_unit = serializers.ChoiceField(
         choices=(
             (PORTION_UNIT_SERVING, PORTION_UNIT_SERVING),
@@ -75,6 +76,8 @@ class PredictionResponseSerializer(serializers.Serializer):
     top_predictions = ClassPredictionSerializer(many=True)
     requested_portion = RequestedPortionSerializer()
     model_version = serializers.CharField()
+    segmentation_requested = serializers.BooleanField()
+    segmentation_applied = serializers.BooleanField()
     segmentation_preview_url = serializers.CharField(allow_null=True, required=False)
     latency_ms = serializers.DictField(child=serializers.FloatField(), required=False)
     warnings = serializers.ListField(child=serializers.CharField(), required=False)
@@ -85,4 +88,6 @@ class HealthResponseSerializer(serializers.Serializer):
     model_version = serializers.CharField(required=False)
     model_name = serializers.CharField(required=False)
     bundle_dir = serializers.CharField(required=False)
+    segmentation_available = serializers.BooleanField(required=False)
+    segmentation_reason = serializers.CharField(required=False, allow_null=True)
     error = serializers.CharField(required=False)

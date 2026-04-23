@@ -33,9 +33,18 @@ type PredictionResponse = {
   selected_class: string;
   top_predictions: ClassPrediction[];
   requested_portion: RequestedPortion;
+  segmentation_requested: boolean;
+  segmentation_applied: boolean;
   latency_ms?: {
     total?: number;
   };
+  warnings?: string[];
+};
+
+type HealthResponse = {
+  ready: boolean;
+  segmentation_available?: boolean;
+  segmentation_reason?: string | null;
 };
 
 type PortionOption = {
@@ -93,6 +102,8 @@ export function SnapCalConsole() {
   const [result, setResult] = useState<PredictionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [enableSegmentation, setEnableSegmentation] = useState(false);
   const [portionUnit, setPortionUnit] = useState<PortionUnit>("serving");
   const [portionValue, setPortionValue] = useState<string>(defaultPortionValue("oz"));
   const inputRef = useRef<HTMLInputElement>(null);
@@ -106,6 +117,36 @@ export function SnapCalConsole() {
     setPreviewUrl(nextUrl);
     return () => URL.revokeObjectURL(nextUrl);
   }, [file]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadHealth() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/health`);
+        if (!response.ok) {
+          throw new Error("Unable to load backend health status.");
+        }
+        const payload = (await response.json()) as HealthResponse;
+        if (isActive) {
+          setHealth(payload);
+        }
+      } catch {
+        if (isActive) {
+          setHealth({
+            ready: false,
+            segmentation_available: false,
+            segmentation_reason: "Could not verify backend segmentation support."
+          });
+        }
+      }
+    }
+
+    void loadHealth();
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   function onFileChange(event: ChangeEvent<HTMLInputElement>) {
     const nextFile = event.target.files?.[0] ?? null;
@@ -130,6 +171,12 @@ export function SnapCalConsole() {
     setError(null);
   }
 
+  function onSegmentationChange(event: ChangeEvent<HTMLInputElement>) {
+    setEnableSegmentation(event.target.checked);
+    setResult(null);
+    setError(null);
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!file) {
@@ -141,6 +188,7 @@ export function SnapCalConsole() {
     setError(null);
     const formData = new FormData();
     formData.append("image", file);
+    formData.append("enable_segmentation", String(enableSegmentation));
     formData.append("portion_unit", portionUnit);
     if (portionUnit !== "serving") {
       formData.append("portion_value", portionValue);
@@ -187,9 +235,16 @@ export function SnapCalConsole() {
     requestedPortion?.approximate && requestedPortion.grams !== null
       ? `Approx. ${Math.round(requestedPortion.grams)} g water-equivalent.`
       : null;
+  const processingModeText = result
+    ? result.segmentation_applied
+      ? "Segmented input"
+      : "Raw classifier"
+    : null;
   const latencyText = result?.latency_ms?.total
     ? `Fetched in ${result.latency_ms.total.toFixed(0)}ms.`
     : null;
+  const segmentationAvailable = health?.segmentation_available ?? false;
+  const segmentationReason = health?.segmentation_reason ?? null;
   const visiblePortionOptions =
     portionUnit === "oz"
       ? SOLID_PORTION_OPTIONS
@@ -198,10 +253,15 @@ export function SnapCalConsole() {
         : [];
   const portionHint =
     portionUnit === "serving"
-      ? "Using the USDA standard serving unless you choose a specific size."
+      ? "Using the USDA standard serving unless we choose a specific size."
       : portionUnit === "fl_oz"
         ? "Liquid sizes use an approximate water-equivalent conversion."
         : "Solid sizes are converted from ounces to grams before scaling nutrition.";
+  const segmentationHint = segmentationAvailable
+    ? enableSegmentation
+      ? "Segmented requests run MobileSAM first, so they can take much longer than just the raw classifier path."
+      : "Compare the fast raw classifier path against the slower segmented path when needed."
+    : segmentationReason ?? "Checking backend segmentation support...";
 
   function openFilePicker() {
     inputRef.current?.click();
@@ -267,6 +327,12 @@ export function SnapCalConsole() {
                     Portion used:{" "}
                     <span className="result-emphasis">{requestedPortionText}</span>
                   </p>
+                  {processingModeText ? (
+                    <p className="result-line">
+                      Processing mode:{" "}
+                      <span className="result-emphasis">{processingModeText}</span>
+                    </p>
+                  ) : null}
                   {requestedPortionNote ? (
                     <p className="result-muted">{requestedPortionNote}</p>
                   ) : null}
@@ -279,6 +345,24 @@ export function SnapCalConsole() {
           </button>
 
           <div className="portion-controls">
+            <label
+              className={`checkbox-field${segmentationAvailable ? "" : " checkbox-field-disabled"}`}
+              htmlFor="enable-segmentation"
+            >
+              <span className="checkbox-row">
+                <input
+                  id="enable-segmentation"
+                  className="checkbox-input"
+                  type="checkbox"
+                  checked={enableSegmentation}
+                  onChange={onSegmentationChange}
+                  disabled={!segmentationAvailable || isSubmitting}
+                />
+                <span className="field-label">Enable segmentation comparison</span>
+              </span>
+              <span className="field-hint">{segmentationHint}</span>
+            </label>
+
             <label className="field" htmlFor="portion-unit">
               <span className="field-label">Portion</span>
               <select
