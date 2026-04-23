@@ -86,7 +86,7 @@ endpoints and integrated well with the exported bundle format. The
 project also finalized portion-size support as part of the application
 workflow so that nutrition output could be scaled beyond the default
 serving size" this para - done
-2. add frontend UI screenshot
+2. add frontend UI screenshot - done
 3. Update confusion matrix pairs
 4. Verify if its according to the requirements
 5. How to remove the water mark - done
@@ -94,4 +94,6 @@ serving size" this para - done
 7. Portion size control in the frontend. - done
 8. Fix title of the report - done
 9. Refresh latency numbers if the final report needs updated runtime measurements.
-10. Capture a frontend screenshot that shows the segmentation comparison checkbox.
+10. Capture a frontend screenshot that shows the segmentation comparison checkbox. - done
+11. Optional: better support the raw-vs-segmented comparison story with one combined collage image showing the raw and segmented states side by side.
+12. Optional: alternatively add a second figure to the report for the comparison story.

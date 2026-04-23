@@ -267,15 +267,13 @@ Calorie mean absolute error remains future work. In addition to the incomplete F
 \subsection{Latency and Deployment Notes}
 The deployed inference architecture was fully implemented around a Django backend and a Next.js frontend. The backend loaded an exported model bundle and returned latency measurements for preprocessing and inference. In local warm-start testing with the exported production bundle, repeated single-image inference calls fell well below the original two-second response target, while the first call remained slower because it included model loading overhead. This distinction matters for deployment because user-perceived latency after service warm-up is more representative than cold-start timing.
 
-Figure~\ref{fig:frontend} is reserved for a final application screenshot.
+Figure~\ref{fig:frontend} shows the current SnapCal frontend after a successful prediction.
 
 \begin{figure}
   \centering
-  \fbox{\parbox[c][1.4in][c]{0.95\linewidth}{\centering
-  Placeholder screenshot for the final frontend.\\
-  Replace with the SnapCal UI showing image upload, predicted class, nutrition results, and the preset portion selectors for standard serving, solid ounces, and liquid fluid ounces.}}
-  \caption{Frontend placeholder. A future revision can replace this box with a screenshot of the completed SnapCal interface.}
-  \Description{A placeholder screenshot box for the SnapCal frontend showing upload controls, prediction output, nutrition values, and preset portion selectors for standard serving, solid ounces, and liquid fluid ounces.}
+  \includegraphics[width=0.95\linewidth]{frontend1.png}
+  \caption{SnapCal frontend showing an uploaded meal image, predicted calories, the preset portion selector, and the segmentation comparison toggle.}
+  \Description{Screenshot of the SnapCal frontend after predicting a hamburger meal. The interface shows the meal image, the detected class, estimated calories, the selected standard serving option, and the segmentation comparison checkbox enabled.}
   \label{fig:frontend}
 \end{figure}
 
