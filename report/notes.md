@@ -37,3 +37,5 @@ workflow so that nutrition output could be scaled beyond the default
 serving size" this para
 2. add frontend UI screenshot
 3. Update confusion matrix pairs
+4. Verify if its according to the requirements
+5. How to remove the water mark
