@@ -1,0 +1,9 @@
+{
+  "extends": "resnet50_raw.json",
+  "experiment_name": "resnet50_raw_local",
+  "batch_size": 16,
+  "epochs": 3,
+  "num_workers": 0,
+  "output_dir": "artifacts/models/resnet50_raw_local",
+  "report_dir": "artifacts/reports/resnet50_raw_local"
+}

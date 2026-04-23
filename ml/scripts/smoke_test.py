@@ -36,6 +36,7 @@ def main() -> None:
         split=args.split,
         dataset_variant=config.dataset_variant,
         transform=build_image_transforms(config.image_size, train=False),
+        fallback_to_raw=config.dataset_variant != "segmented",
     )
     model = build_model(config.model_name, config.num_classes)
     batch = [dataset[index]["image"] for index in range(min(args.count, len(dataset)))]

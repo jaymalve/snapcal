@@ -204,9 +204,13 @@ class MobileSAMSegmenter:
             import torch
             from mobile_sam import SamAutomaticMaskGenerator, sam_model_registry
         except ImportError as exc:  # pragma: no cover - depends on optional dependency
-            raise RuntimeError("mobile-sam is not installed. Install snapcal[train] to enable segmentation.") from exc
+            raise RuntimeError(
+                "MobileSAM dependencies are incomplete. Install snapcal[train] to enable segmentation."
+            ) from exc
 
         self._device = resolve_torch_device()
+        if getattr(self._device, "type", None) == "mps":
+            self._device = torch.device("cpu")
         print(f"Loading MobileSAM on device: {self._device}")
         sam = sam_model_registry[self.config.model_type](checkpoint=str(self.config.checkpoint_path))
         sam.to(device=self._device)

@@ -48,24 +48,28 @@ class Trainer:
         from torch.utils.data import DataLoader
 
         device = self._device()
+        require_segmented_files = self.config.dataset_variant == "segmented"
 
         train_dataset = Food101ManifestDataset(
             manifest_path=self.config.train_manifest,
             split="train",
             dataset_variant=self.config.dataset_variant,
             transform=build_image_transforms(self.config.image_size, train=True),
+            fallback_to_raw=not require_segmented_files,
         )
         val_dataset = Food101ManifestDataset(
             manifest_path=self.config.val_manifest,
             split="val",
             dataset_variant=self.config.dataset_variant,
             transform=build_image_transforms(self.config.image_size, train=False),
+            fallback_to_raw=not require_segmented_files,
         )
         test_dataset = Food101ManifestDataset(
             manifest_path=self.config.test_manifest,
             split="test",
             dataset_variant=self.config.dataset_variant,
             transform=build_image_transforms(self.config.image_size, train=False),
+            fallback_to_raw=not require_segmented_files,
         )
         loader_kwargs = {
             "batch_size": self.config.batch_size,
