@@ -1,0 +1,44 @@
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Helvetica, Arial, sans-serif", "background": "#ffffff", "primaryColor": "#ffffff", "primaryTextColor": "#000000", "primaryBorderColor": "#000000", "secondaryColor": "#ffffff", "secondaryTextColor": "#000000", "secondaryBorderColor": "#000000", "tertiaryColor": "#ffffff", "tertiaryTextColor": "#000000", "tertiaryBorderColor": "#000000", "lineColor": "#000000", "textColor": "#000000", "mainBkg": "#ffffff", "nodeBorder": "#000000", "clusterBkg": "#ffffff", "clusterBorder": "#000000", "edgeLabelBackground": "#ffffff"}, "flowchart": {"curve": "linear", "nodeSpacing": 28, "rankSpacing": 35}}}%%
+flowchart TB
+  subgraph Offline[Offline Research Pipeline]
+    D[Food-101 dataset]
+    M[Build canonical manifest]
+    S[Optional MobileSAM preprocessing]
+    T[Train ResNet-50 / EfficientNet-B0 / ViT-B16]
+    E[Evaluate predictions and export best checkpoint]
+    B[Inference bundle\nweights + metadata + nutrition mapping]
+
+    D --> M
+    M --> S
+    M --> T
+    S --> T
+    T --> E
+    E --> B
+  end
+
+  subgraph Online[Online Inference Pipeline]
+    U[User uploads meal photo]
+    F[Next.js frontend]
+    A[Django API]
+    P[Preprocess input]
+    OS[Optional MobileSAM segmentation]
+    C[Classifier inference]
+    K[Top-k predictions]
+    N[USDA nutrition lookup]
+    R[Portion scaling]
+    O[Prediction response\nclass + nutrition + latency]
+
+    U --> F
+    F -->|image + portion multiplier| A
+    A --> P
+    P --> OS
+    P --> C
+    OS --> C
+    C --> K
+    K --> N
+    N --> R
+    R --> O
+    O --> F
+  end
+
+  B --> A

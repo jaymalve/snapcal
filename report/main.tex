@@ -140,11 +140,9 @@ Figure~\ref{fig:pipeline} shows the system pipeline at a high level.
 
 \begin{figure}
   \centering
-  \fbox{\parbox[c][1.4in][c]{0.95\linewidth}{\centering
-  Placeholder pipeline diagram for final version.\\
-  Image upload $\rightarrow$ optional MobileSAM segmentation $\rightarrow$ classifier $\rightarrow$ USDA lookup $\rightarrow$ portion scaling $\rightarrow$ UI response.}}
-  \caption{High-level SnapCal pipeline. A future revision can replace this placeholder with a polished architecture diagram.}
-  \Description{A placeholder diagram box describing the SnapCal flow from image upload through segmentation, classification, USDA lookup, portion scaling, and UI output.}
+  \includegraphics[width=0.95\linewidth]{figures/pipeline.png}
+  \caption{High-level SnapCal pipeline showing the offline research workflow and the online inference path.}
+  \Description{Diagram showing the SnapCal offline research pipeline from Food-101 dataset to manifest generation, optional MobileSAM preprocessing, model training, evaluation, and exported inference bundle, followed by the online inference pipeline from user upload through the Next.js frontend, Django API, optional segmentation, classifier inference, USDA nutrition lookup, portion scaling, and prediction response.}
   \label{fig:pipeline}
 \end{figure}
 
