@@ -23,7 +23,7 @@
 \renewcommand{\shortauthors}{Malve}
 
 \begin{abstract}
-SnapCal is an end-to-end food recognition and calorie estimation system built around Food-101 image classification, USDA nutrition lookup, and a web-based inference workflow. The original project goal was to test whether Segment Anything Model (SAM) guided food isolation could improve classification accuracy and downstream calorie estimation reliability compared to raw-image baselines. To support that goal, the project implemented a reproducible research pipeline that generated Food-101 manifests, supported MobileSAM preprocessing, trained ResNet-50, EfficientNet-B0, and ViT-B/16 classifiers, exported inference bundles, served predictions through a Django API, and exposed the workflow through a Next.js frontend with portion-size control. The strongest currently verified experiment in the repository is a local ResNet-50 raw-image baseline trained on Food-101, which achieved 84.83\% top-1 accuracy, 97.00\% top-5 accuracy, and 0.848 macro F1 on the 25,250-image test split. These results indicate that the implemented pipeline reached a strong baseline close to the original project target for top-1 accuracy. The report documents the completed system, summarizes the verified baseline, and reserves explicit placeholders for the final SAM ablation, cross-architecture comparison, and calorie mean absolute error analysis that will be inserted before final submission.
+SnapCal is an end-to-end food recognition and calorie estimation system built around Food-101 image classification, USDA nutrition lookup, and a web-based inference workflow. The original project goal was to test whether Segment Anything Model (SAM) guided food isolation could improve classification accuracy and downstream calorie estimation reliability compared to raw-image baselines. To support that goal, the project implemented a reproducible research pipeline that generated Food-101 manifests, supported MobileSAM preprocessing, trained ResNet-50, EfficientNet-B0, and ViT-B/16 classifiers, exported inference bundles, served predictions through a Django API, and exposed the workflow through a Next.js frontend with portion-size control. The strongest fully verified experiment in the repository is a local ResNet-50 raw-image baseline trained on the full Food-101 test split, which achieved 84.83\% top-1 accuracy, 97.00\% top-5 accuracy, and 0.848 macro F1 on 25,250 test images. To probe the segmentation question within local compute limits, this report also includes a matched ResNet-50 pilot ablation on a reduced 808-image stratified manifest. In that pilot, segmented inputs underperformed raw inputs, dropping top-1 accuracy from 15.84\% to 11.88\% and macro F1 from 0.112 to 0.096. The report therefore documents a completed end-to-end system, a strong verified full-dataset baseline, and a preliminary local segmentation result, while deferring full cross-architecture and calorie-estimation studies to future work.
 \end{abstract}
 
 \keywords{food recognition, calorie estimation, computer vision, MobileSAM, Vision Transformer, Django, Next.js}
@@ -37,7 +37,7 @@ Estimating the nutritional content of a meal from a photograph is a useful compu
 
 This project studied whether food-first preprocessing could improve recognition quality. The original proposal centered on a distilled Segment Anything Model (SAM) pipeline that would isolate food regions before classification, followed by a model that mapped the predicted class to USDA nutrition values for calorie and macronutrient estimation. The project also aimed to compare segmented and unsegmented inputs across transformer and convolutional architectures.
 
-The final implemented system grew into a complete monorepo that covered offline preprocessing, model training, evaluation, export, backend serving, and frontend interaction. The backend was fully implemented in Django, and the user workflow included portion-size adjustment so that standard-serving nutrition values could be scaled at inference time. Although the full experiment matrix was not yet finalized at the moment of this draft, the repository already contained a verified baseline experiment and a completed end-to-end system architecture. This report therefore documents both the completed engineering work and the current state of the experimental evidence.
+The final implemented system grew into a complete monorepo that covered offline preprocessing, model training, evaluation, export, backend serving, and frontend interaction. The backend was fully implemented in Django, and the user workflow included portion-size adjustment so that standard-serving nutrition values could be scaled at inference time. However, full segmented preprocessing over all 101,000 Food-101 images was not practical on the available local hardware, so this report presents two levels of evidence instead of a complete experiment matrix: a verified full-dataset raw baseline and a smaller local ResNet-50 pilot ablation on a reduced stratified manifest. This report therefore documents both the completed engineering work and the current, compute-constrained experimental evidence.
 
 \section{Related Work and Background}
 Food recognition has been studied as a fine-grained visual classification problem because many meal categories share similar colors, textures, and presentation styles. Food-101 is a standard benchmark for this setting because it contains 101 classes with substantial intra-class variation and strong background diversity \cite{bossard2014food101}.
@@ -71,12 +71,14 @@ Table~\ref{tab:dataset-summary} summarizes the dataset organization used by the 
   \end{tabular}
 \end{table}
 
+In addition to the full manifest, the project generated a reduced local pilot manifest for the preliminary SAM ablation reported later in this paper. That pilot kept all 101 classes but sampled only 5 training images, 1 validation image, and 2 test images per class, for 808 total images. The pilot manifest was used only for the matched raw-versus-segmented ResNet-50 comparison and is reported separately from the full-dataset baseline so that the two result types are not conflated.
+
 \subsection{SAM-Guided Segmentation Pipeline}
 The segmentation stage was implemented with MobileSAM. For each input image, the pipeline generated candidate masks, filtered them by minimum area and area ratio, ranked them using a weighted score, and selected the most prominent one or two masks for composition. The ranking score combined mask area ratio, predicted IoU, stability score, and a center-distance penalty so that large, confident, centrally located food regions were preferred.
 
 After mask selection, the system combined the chosen masks, replaced the background with an ImageNet-style fill color, cropped around the selected region with a small margin, and resized the result to 224\,$\times$\,224 pixels. The segmentation code also exported mask metadata such as candidate counts, bounding boxes, mask scores, and retained area ratios so that the preprocessing stage remained inspectable.
 
-At the time of this draft, the manifest paths and segmentation tooling were fully implemented, but the repository-tracked manifest still recorded segmentation entries as pending. As a result, segmentation was a completed part of the system design and codebase, but the final segmented-dataset experiment matrix was still awaiting the last full preprocessing run.
+The manifest paths and segmentation tooling were fully implemented, and the pipeline was exercised end-to-end on a reduced local pilot manifest. However, a full segmented preprocessing pass over the entire 101,000-image dataset remained impractical on the available local hardware. As a result, this report includes a preliminary segmented-input pilot ablation rather than a full segmented-dataset sweep.
 
 \subsection{Classification Models}
 SnapCal supported three pretrained classifier families:
@@ -90,34 +92,37 @@ SnapCal supported three pretrained classifier families:
 The training pipeline was config-driven and loaded one of the three model families based on a JSON experiment file. For ResNet-50 and EfficientNet-B0, the classification head was replaced with a 101-class layer. For ViT-B/16, the Hugging Face Transformers implementation loaded the pretrained `google/vit-base-patch16-224-in21k` checkpoint and replaced the classifier head to match Food-101 labels \cite{transformers}.
 
 \subsection{Training Procedure}
-The shared base training configuration used image size 224, batch size 64, 15 epochs, AdamW with learning rate $3 \times 10^{-4}$, weight decay 0.01, and label smoothing 0.1. The learning rate scheduler used cosine annealing. The training augmentations included random horizontal flip, random rotation up to 15 degrees, color jitter, and random erasing. A local reduced experiment configuration was also used for the verified baseline reported in this draft; that run used batch size 16, 3 epochs, and zero data-loader workers to fit a self-contained local workflow.
+The shared base training configuration used image size 224, batch size 64, 15 epochs, AdamW with learning rate $3 \times 10^{-4}$, weight decay 0.01, and label smoothing 0.1. The learning rate scheduler used cosine annealing. The training augmentations included random horizontal flip, random rotation up to 15 degrees, color jitter, and random erasing. A reduced local configuration was used for the verified full-dataset baseline reported in this paper; that run used batch size 16, 3 epochs, and zero data-loader workers to fit a self-contained local workflow. The same reduced training settings were also reused for the preliminary pilot ablation, but on the 808-image sampled manifest described above.
 
-Table~\ref{tab:training-config} summarizes the two configuration levels most relevant to this report.
+Table~\ref{tab:training-config} summarizes the three configuration levels most relevant to this report.
 
 \begin{table}
-  \caption{Training configuration summary. The base configuration reflects the general project setup, while the local baseline row reflects the verified run reported in this draft.}
+  \caption{Training configuration summary. The base configuration reflects the general project setup, the verified local baseline reflects the strongest full-dataset run in the repository, and the pilot column reflects the matched quick ablation used for the preliminary segmentation study.}
   \label{tab:training-config}
-  \begin{tabular}{lcc}
+  \begin{tabular}{lccc}
     \toprule
-    Setting & Base pipeline & Verified local baseline \\
+    Setting & Base pipeline & Verified local baseline & Quick pilot ablation \\
     \midrule
-    Model & Config-dependent & ResNet-50 \\
-    Input variant & Raw or segmented & Raw \\
-    Image size & 224 & 224 \\
-    Batch size & 64 & 16 \\
-    Epochs & 15 & 3 \\
-    Learning rate & 0.0003 & 0.0003 \\
-    Optimizer & AdamW & AdamW \\
-    Scheduler & Cosine annealing & Cosine annealing \\
-    Label smoothing & 0.1 & 0.1 \\
+    Model & Config-dependent & ResNet-50 & ResNet-50 \\
+    Input variant & Raw or segmented & Raw & Raw and segmented \\
+    Manifest & Full Food-101 & Full Food-101 & 808-image subset \\
+    Image size & 224 & 224 & 224 \\
+    Batch size & 64 & 16 & 16 \\
+    Epochs & 15 & 3 & 3 \\
+    Learning rate & 0.0003 & 0.0003 & 0.0003 \\
+    Optimizer & AdamW & AdamW & AdamW \\
+    Scheduler & Cosine annealing & Cosine annealing & Cosine annealing \\
+    Label smoothing & 0.1 & 0.1 & 0.1 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
+For the pilot ablation, the segmentation stage used a faster local MobileSAM configuration with fewer prompt points and no crop-layer recursion so that preprocessing could finish within a single local work session. That speed-oriented setting is useful for a preliminary ablation, but it is not equivalent to a final full-dataset segmentation study.
+
 \subsection{Nutrition and Calorie Estimation}
 The calorie estimation stage mapped each Food-101 class to an entry in USDA FoodData Central \cite{usdafdc}. Each mapping row stored serving size, calories, protein, carbohydrates, fat, and metadata about mapping confidence. At inference time, the system returned the top predictions, looked up the corresponding standard-serving nutrition facts, and then scaled those values by a user-selected portion multiplier.
 
-This design kept the calorie pipeline interpretable because it made every nutrition estimate traceable to a specific class prediction and a specific reference entry. At the same time, it introduced a dependency on the quality of the Food-101-to-USDA mapping table. In the repository version used for this draft, 74 of 101 classes were populated with auto-filled USDA matches, while 27 classes were still marked for manual curation. That incomplete coverage is the main reason the final calorie mean absolute error analysis is still treated as a placeholder in this draft.
+This design kept the calorie pipeline interpretable because it made every nutrition estimate traceable to a specific class prediction and a specific reference entry. At the same time, it introduced a dependency on the quality of the Food-101-to-USDA mapping table. In the repository version used for this report, 74 of 101 classes were populated with auto-filled USDA matches, while 27 classes were still marked for manual curation. That incomplete coverage, together with the missing external calorie-evaluation protocol, is the main reason calorie MAE remains future work in this report.
 
 \subsection{System Architecture and Implementation}
 The final system was implemented as a monorepo with four main layers:
@@ -129,7 +134,7 @@ The final system was implemented as a monorepo with four main layers:
 \item a Next.js frontend that handled image upload, camera capture, result display, and portion-size adjustment
 \end{itemize}
 
-The backend loaded an exported inference bundle containing the model weights, metadata, optional segmentation config, and nutrition mapping. The frontend sent an image and portion multiplier to the API, and the API returned the selected class, top predictions, nutrition facts, and latency metrics. This architecture aligned with the original goal of deploying an end-to-end meal analysis application, even though the local verified experiment in this draft focused on the raw-image baseline.
+The backend loaded an exported inference bundle containing the model weights, metadata, optional segmentation config, and nutrition mapping. The frontend sent an image and portion multiplier to the API, and the API returned the selected class, top predictions, nutrition facts, and latency metrics. This architecture aligned with the original goal of deploying an end-to-end meal analysis application, even though the strongest fully verified full-dataset experiment in this report focused on the raw-image baseline.
 
 Figure~\ref{fig:pipeline} shows the system pipeline at a high level.
 
@@ -138,7 +143,7 @@ Figure~\ref{fig:pipeline} shows the system pipeline at a high level.
   \fbox{\parbox[c][1.4in][c]{0.95\linewidth}{\centering
   Placeholder pipeline diagram for final version.\\
   Image upload $\rightarrow$ optional MobileSAM segmentation $\rightarrow$ classifier $\rightarrow$ USDA lookup $\rightarrow$ portion scaling $\rightarrow$ UI response.}}
-  \caption{High-level SnapCal pipeline. The final report can replace this placeholder with a polished architecture diagram.}
+  \caption{High-level SnapCal pipeline. A future revision can replace this placeholder with a polished architecture diagram.}
   \Description{A placeholder diagram box describing the SnapCal flow from image upload through segmentation, classification, USDA lookup, portion scaling, and UI output.}
   \label{fig:pipeline}
 \end{figure}
@@ -165,7 +170,7 @@ Table~\ref{tab:baseline-results} summarizes the verified baseline.
   \end{tabular}
 \end{table}
 
-This baseline was important for two reasons. First, it established that the training, evaluation, and export pipeline produced a competitive Food-101 model even before the full segmentation study was complete. Second, it provided a strong reference point for the upcoming segmented-input ablation. The top-1 result also landed close to the original project goal of 85\% accuracy, which suggested that the core classification pipeline was viable.
+This baseline was important for two reasons. First, it established that the training, evaluation, and export pipeline produced a competitive Food-101 model even before any segmented-input comparison was completed. Second, it provided a strong reference point for the overall quality of the raw-image classification pipeline. The top-1 result also landed close to the original project goal of 85\% accuracy, which suggested that the core classification pipeline was viable. Because the pilot ablation reported next uses a much smaller manifest, its results are analyzed separately rather than being compared directly to this full-dataset baseline.
 
 \subsection{Per-Class Behavior}
 Per-class F1 analysis showed that some categories were classified very reliably, while others remained difficult because of visual similarity across dishes. The five strongest classes in the verified baseline were `edamame` (0.992), `macarons` (0.970), `oysters` (0.952), `hot\_and\_sour\_soup` (0.950), and `miso\_soup` (0.945). The five weakest classes were `pork\_chop` (0.580), `steak` (0.618), `chocolate\_mousse` (0.660), `apple\_pie` (0.668), and `bread\_pudding` (0.687).
@@ -215,60 +220,41 @@ The confusion matrix highlighted several visually intuitive failure pairs. The l
   \end{tabular}
 \end{table}
 
-These confusion patterns provide a concrete target for the final segmented-input study. If segmentation removes distracting dishware and background cues while preserving food texture and shape, the hardest classes should show the clearest gains.
+These confusion patterns provide a concrete target for both the preliminary segmented-input pilot and any future full-dataset segmented evaluation. If segmentation removes distracting dishware and background cues while preserving food texture and shape, the hardest classes should show the clearest gains.
 
-\subsection{SAM Segmentation Ablation}
-\textbf{Draft placeholder.} The final report will replace this subsection with the completed raw-versus-segmented ablation across all supported architectures. The intended table format is shown below so that the remaining results can be inserted without restructuring the paper.
+\subsection{Preliminary SAM Segmentation Ablation}
+To evaluate the segmented-input path within local compute limits, the project ran a matched ResNet-50 pilot ablation on the reduced 808-image stratified manifest described earlier. Both pilot runs used the same 3-epoch local training settings and the same sampled raw images; the only difference was whether the input images were fed directly to the classifier or first processed with the faster local MobileSAM configuration.
 
 \begin{table*}
-  \caption{Draft placeholder for the final SAM ablation study. Replace all TBD values before final submission.}
+  \caption{Preliminary local ResNet-50 SAM ablation on the reduced 808-image pilot manifest.}
   \label{tab:sam-ablation}
   \begin{tabular}{lcccccc}
     \toprule
     Model & Raw top-1 & Segmented top-1 & Raw top-5 & Segmented top-5 & Raw macro F1 & Segmented macro F1 \\
     \midrule
-    ResNet-50 & 84.83\% & TBD & 97.00\% & TBD & 0.848 & TBD \\
-    EfficientNet-B0 & TBD & TBD & TBD & TBD & TBD & TBD \\
-    ViT-B/16 & TBD & TBD & TBD & TBD & TBD & TBD \\
+    ResNet-50 pilot & 15.84\% & 11.88\% & 38.61\% & 29.21\% & 0.112 & 0.096 \\
     \bottomrule
   \end{tabular}
 \end{table*}
 
-The analysis paragraph to be filled in later should answer two questions: whether segmentation improved overall metrics, and which classes benefited most from removing background clutter.
+Under this constrained pilot, segmentation did not improve the aggregate metrics. Compared with the raw-input pilot run, segmented inputs reduced top-1 accuracy by 3.96 percentage points, reduced top-5 accuracy by 9.41 percentage points, and reduced macro F1 by 0.016. This is still a preliminary result rather than a definitive answer to the original research question. The pilot test split contains only 2 images per class, which makes class-level statistics too unstable for strong per-class claims, and the segmentation config was deliberately simplified to keep runtime manageable on local hardware. The main value of this pilot is therefore twofold: it verifies that the full segmented preprocessing, training, and evaluation path works end-to-end, and it provides an honest early signal that segmentation did not help under this small local setting.
 
 \subsection{Cross-Architecture Comparison}
-\textbf{Draft placeholder.} The repository already supported ResNet-50, EfficientNet-B0, and ViT-B/16 training through config-driven experiments, but the final cross-architecture result matrix had not yet been inserted into this draft. Table~\ref{tab:architecture-comparison} is reserved for those results.
-
-\begin{table}
-  \caption{Draft placeholder for the final cross-architecture comparison. Replace all TBD values before final submission.}
-  \label{tab:architecture-comparison}
-  \begin{tabular}{lccc}
-    \toprule
-    Model & Input variant & Top-1 & Macro F1 \\
-    \midrule
-    ResNet-50 & Raw & 84.83\% & 0.848 \\
-    ResNet-50 & Segmented & TBD & TBD \\
-    EfficientNet-B0 & Raw & TBD & TBD \\
-    EfficientNet-B0 & Segmented & TBD & TBD \\
-    ViT-B/16 & Raw & TBD & TBD \\
-    ViT-B/16 & Segmented & TBD & TBD \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+The repository already supported ResNet-50, EfficientNet-B0, and ViT-B/16 training through config-driven experiments, but a fair cross-architecture matrix would require either full-dataset segmented preprocessing or matched reduced-manifest pilot runs for all three backbones. Given the available local compute budget, this report intentionally defers that comparison to future work instead of mixing full-dataset ResNet-50 results with pilot-scale segmented results. The next logical extension would be to repeat the same reduced-manifest pilot protocol for EfficientNet-B0 and ViT-B/16, then move the final six-run raw-versus-segmented matrix to GPU-backed hardware.
 
 \subsection{Calorie Estimation Accuracy}
-\textbf{Draft placeholder.} The final report will include calorie mean absolute error only after the Food-101-to-USDA mapping table is fully curated and the final prediction set is locked. In the repository version used for this draft, 74 classes had auto-filled USDA matches and 27 still required manual curation, so reporting calorie MAE as a finished metric would overstate confidence.
+Calorie mean absolute error remains future work. In addition to the incomplete Food-101-to-USDA mapping table, the project still needs a clearly defined calorie-evaluation protocol so that the same lookup table is not reused as both the prediction source and the evaluation target. In the repository version used for this report, 74 classes had populated USDA matches and 27 still required manual curation, so reporting calorie MAE as a finished metric would overstate confidence.
 
 \begin{table}
-  \caption{Draft placeholder for final calorie estimation results. Replace all TBD values before final submission.}
+  \caption{Current status of the calorie estimation evaluation path.}
   \label{tab:calorie-results}
-  \begin{tabular}{lc}
+  \begin{tabular}{lp{0.5\linewidth}}
     \toprule
     Metric & Value \\
     \midrule
-    Classes with complete curated USDA mapping & TBD / 101 \\
-    Calorie MAE on correctly classified items & TBD kcal \\
-    Portion-scaling evaluation note & TBD \\
+    Classes with populated USDA mapping & 74 / 101 \\
+    Calorie MAE status & Deferred until mapping curation and evaluation protocol are finalized \\
+    Portion-scaling evaluation note & Implemented in the product workflow, but not yet benchmarked against external calorie labels \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -283,7 +269,7 @@ Figure~\ref{fig:frontend} is reserved for a final application screenshot.
   \fbox{\parbox[c][1.4in][c]{0.95\linewidth}{\centering
   Placeholder screenshot for the final frontend.\\
   Replace with the SnapCal UI showing image upload, predicted class, nutrition results, and portion-size control.}}
-  \caption{Frontend placeholder. The final report will replace this box with a screenshot of the completed SnapCal interface.}
+  \caption{Frontend placeholder. A future revision can replace this box with a screenshot of the completed SnapCal interface.}
   \Description{A placeholder screenshot box for the SnapCal frontend showing upload controls, prediction output, nutrition values, and portion-size adjustment.}
   \label{fig:frontend}
 \end{figure}
@@ -291,16 +277,16 @@ Figure~\ref{fig:frontend} is reserved for a final application screenshot.
 \section{Discussion}
 Several aspects of the project worked well. First, the repository matured into a complete end-to-end system rather than stopping at an isolated notebook experiment. The project implemented manifest generation, optional segmentation, model training, evaluation, bundle export, API inference, and frontend interaction in a single reproducible codebase. Second, the verified ResNet-50 raw baseline was strong enough to validate the core learning setup. A top-1 accuracy of 84.83\% and top-5 accuracy of 97.00\% indicated that the training and evaluation pipeline was functioning well and that transfer learning on Food-101 was effective.
 
-The project also surfaced several limitations. The most important experimental limitation was that the final segmented-input ablation had not yet been fully populated in the draft. That means the central research question --- whether SAM-guided preprocessing materially improves recognition quality --- is supported by a completed implementation path but not yet by the final comparison table in this version. Similarly, the calorie-estimation stage depended on a mapping table that still required manual curation for part of the label set, which prevented a strong final calorie MAE claim at draft time.
+The project also surfaced several limitations. The most important experimental limitation was compute scale. The report now includes a preliminary segmented-input pilot ablation, but that study was run on a reduced 808-image manifest with a speed-oriented local segmentation config rather than on the full Food-101 dataset. That means the central research question --- whether SAM-guided preprocessing materially improves recognition quality at full scale --- is still only partially answered in this version. Similarly, the calorie-estimation stage depended on a mapping table that still required manual curation for part of the label set and on an evaluation protocol that had not yet been formalized, which prevented a strong calorie MAE claim.
 
 Another useful insight is that the project evolved slightly from the original proposal while still preserving its core goal. The proposal described a FastAPI backend, but the final production backend was implemented in Django. That change did not weaken the system; in practice, the Django API cleanly exposed health and prediction endpoints and integrated well with the exported bundle format. The project also finalized portion-size support as part of the application workflow so that nutrition output could be scaled beyond the default serving size.
 
-Overall, the baseline results and system implementation suggest that the project succeeded as both a research platform and a deployable prototype. The remaining work is focused less on engineering completion and more on filling in the last experimental comparisons so the final report can answer the original segmentation question quantitatively.
+Overall, the baseline results and system implementation suggest that the project succeeded as both a research platform and a deployable prototype. The report now contains both a strong verified full-dataset raw baseline and a preliminary local raw-versus-segmented pilot, but the final full-scale segmentation question remains future work rather than a closed result.
 
 \section{Conclusion and Future Work}
 This project presented SnapCal, a food recognition and calorie estimation system built around Food-101 classification, optional MobileSAM preprocessing, USDA nutrition lookup, a Django inference backend, and a Next.js frontend. The completed implementation covered the full path from raw image input to portion-adjusted nutrition output. The strongest currently verified model in the repository, a raw-image ResNet-50 baseline, achieved 84.83\% top-1 accuracy and 97.00\% top-5 accuracy on the Food-101 test set, demonstrating that the classification backbone of the system was already strong.
 
-The next step before final submission is not architectural redesign but experimental completion. The final version of this report will replace the marked placeholders with the completed SAM ablation, the full ViT versus ResNet versus EfficientNet comparison, and the final calorie MAE analysis after nutrition mappings are fully curated. Once those results are inserted, the report will be able to answer the original research question directly: whether SAM-guided segmentation measurably improved food recognition and calorie-estimation reliability over raw-image baselines.
+To probe the segmentation question under realistic local compute constraints, the project also ran a matched ResNet-50 pilot ablation on a reduced 808-image manifest. In that pilot, segmented inputs underperformed raw inputs, achieving 11.88\% top-1 accuracy versus 15.84\% for the raw-input pilot. Because the pilot used only two test examples per class and a speed-oriented local segmentation config, it should be interpreted as a preliminary signal rather than a definitive answer. Future work should rerun the segmentation study on the full Food-101 dataset with GPU-backed preprocessing, extend the same protocol to EfficientNet-B0 and ViT-B/16, and define a stricter calorie-evaluation protocol after the USDA mappings are fully curated.
 
 \begin{acks}
 This report used the course-provided ACM template structure as a starting point and was adapted into a class project report format. The SnapCal codebase integrates research components, deployment utilities, and application code across Python, Django, and Next.js.
@@ -312,24 +298,25 @@ This report used the course-provided ACM template structure as a starting point 
 \appendix
 
 \section{Implementation Snapshot}
-The repository snapshot used for this draft contained the following report-relevant evidence:
+The repository snapshot used for this report contained the following report-relevant evidence:
 
 \begin{itemize}
 \item a canonical Food-101 manifest with 101,000 total rows
 \item completed segmentation code and configuration for MobileSAM preprocessing
 \item config-driven model support for ResNet-50, EfficientNet-B0, and ViT-B/16
 \item a verified local experiment report for `resnet50\_raw\_local`
+\item paired pilot reports for `resnet50\_raw\_quick\_ablation` and `resnet50\_segmented\_quick\_ablation`
 \item an exported production bundle for backend inference
 \item a Django API and Next.js frontend wired for image-based inference
 \end{itemize}
 
-\section{Final Draft Checklist}
-Before final submission, replace the placeholder sections and figures with:
+\section{Open Follow-Ups}
+The main remaining follow-up items after this report are:
 
 \begin{itemize}
-\item completed SAM raw-versus-segmented ablation results
-\item completed ViT versus ResNet versus EfficientNet comparison table
-\item finalized calorie MAE analysis with curated USDA mappings
+\item rerun the SAM raw-versus-segmented ablation on the full Food-101 dataset with GPU-backed preprocessing
+\item extend the matched pilot protocol to EfficientNet-B0 and ViT-B/16 before building a final cross-architecture matrix
+\item finalize the calorie MAE protocol and curate the remaining USDA mappings
 \item a polished pipeline diagram
 \item a real frontend screenshot including portion-size control
 \end{itemize}

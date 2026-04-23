@@ -21,6 +21,25 @@ python ml/scripts/train.py --config configs/training/resnet50_segmented_local.js
 
 Segmented training now fails fast if `data/processed/segmented/...` files are missing, so do not skip the segmentation step.
 
+## Quick 1-2 Hour Pilot Ablation
+
+If you need a same-machine pilot run rather than a full-dataset result, create a smaller manifest and use the faster local segmentation config:
+
+```bash
+python ml/scripts/sample_manifest.py \
+  --manifest data/reference/manifests/food101_manifest.csv \
+  --output artifacts/manifests/food101_quick_ablation_manifest.csv \
+  --train-per-class 5 \
+  --val-per-class 1 \
+  --test-per-class 2
+python ml/scripts/fetch_mobilesam_checkpoint.py
+python ml/scripts/run_segmentation.py --manifest artifacts/manifests/food101_quick_ablation_manifest.csv --config configs/segmentation/mobilesam_fast_local.json
+python ml/scripts/train.py --config configs/training/resnet50_raw_quick_ablation.json
+python ml/scripts/train.py --config configs/training/resnet50_segmented_quick_ablation.json
+```
+
+This keeps all 101 classes but reduces the pilot to 808 total images. It is suitable for a preliminary local ablation, not a final headline result.
+
 ## Suggested Order
 
 ```bash

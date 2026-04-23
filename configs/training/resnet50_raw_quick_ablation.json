@@ -1,0 +1,9 @@
+{
+  "extends": "resnet50_raw_local.json",
+  "experiment_name": "resnet50_raw_quick_ablation",
+  "train_manifest": "artifacts/manifests/food101_quick_ablation_manifest.csv",
+  "val_manifest": "artifacts/manifests/food101_quick_ablation_manifest.csv",
+  "test_manifest": "artifacts/manifests/food101_quick_ablation_manifest.csv",
+  "output_dir": "artifacts/models/resnet50_raw_quick_ablation",
+  "report_dir": "artifacts/reports/resnet50_raw_quick_ablation"
+}
