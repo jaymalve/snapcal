@@ -3,25 +3,71 @@
 import Image from "next/image";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 
+type PortionUnit = "serving" | "oz" | "fl_oz";
+
 type NutritionFacts = {
+  serving_size_g: number | null;
+  serving_unit: string;
   calories_kcal: number | null;
+  protein_g: number | null;
+  carbs_g: number | null;
+  fat_g: number | null;
 };
 
 type ClassPrediction = {
   class_name: string;
+  confidence: number;
+  nutrition_per_serving: NutritionFacts;
   nutrition_adjusted: NutritionFacts;
+};
+
+type RequestedPortion = {
+  unit: PortionUnit;
+  value: number | null;
+  label: string;
+  grams: number | null;
+  approximate: boolean;
 };
 
 type PredictionResponse = {
   selected_class: string;
   top_predictions: ClassPrediction[];
+  requested_portion: RequestedPortion;
   latency_ms?: {
     total?: number;
   };
 };
 
+type PortionOption = {
+  value: number;
+  label: string;
+};
+
+const SOLID_PORTION_OPTIONS: PortionOption[] = [
+  { value: 4, label: "4 oz" },
+  { value: 6, label: "6 oz" },
+  { value: 8, label: "8 oz" },
+  { value: 12, label: "12 oz" },
+  { value: 16, label: "16 oz (1 lb)" },
+  { value: 24, label: "24 oz (1 lb 8 oz)" },
+  { value: 32, label: "32 oz (2 lb)" }
+];
+
+const LIQUID_PORTION_OPTIONS: PortionOption[] = [
+  { value: 4, label: "4 fl oz" },
+  { value: 8, label: "8 fl oz" },
+  { value: 12, label: "12 fl oz" },
+  { value: 16, label: "16 fl oz" }
+];
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
+
+function defaultPortionValue(unit: Exclude<PortionUnit, "serving">) {
+  return unit === "oz"
+    ? String(SOLID_PORTION_OPTIONS[2].value)
+    : String(LIQUID_PORTION_OPTIONS[1].value);
+}
 
 function formatLabel(value: string) {
   return value.replaceAll("_", " ");
@@ -47,6 +93,8 @@ export function SnapCalConsole() {
   const [result, setResult] = useState<PredictionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [portionUnit, setPortionUnit] = useState<PortionUnit>("serving");
+  const [portionValue, setPortionValue] = useState<string>(defaultPortionValue("oz"));
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -66,6 +114,22 @@ export function SnapCalConsole() {
     setError(null);
   }
 
+  function onPortionUnitChange(event: ChangeEvent<HTMLSelectElement>) {
+    const nextUnit = event.target.value as PortionUnit;
+    setPortionUnit(nextUnit);
+    setPortionValue(
+      nextUnit === "serving" ? defaultPortionValue("oz") : defaultPortionValue(nextUnit)
+    );
+    setResult(null);
+    setError(null);
+  }
+
+  function onPortionValueChange(event: ChangeEvent<HTMLSelectElement>) {
+    setPortionValue(event.target.value);
+    setResult(null);
+    setError(null);
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!file) {
@@ -77,7 +141,10 @@ export function SnapCalConsole() {
     setError(null);
     const formData = new FormData();
     formData.append("image", file);
-    formData.append("portion_multiplier", "1.0");
+    formData.append("portion_unit", portionUnit);
+    if (portionUnit !== "serving") {
+      formData.append("portion_value", portionValue);
+    }
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/predict`, {
@@ -114,9 +181,27 @@ export function SnapCalConsole() {
   const estimatedCalories = primaryPrediction
     ? formatCalories(primaryPrediction.nutrition_adjusted.calories_kcal)
     : "N/A";
+  const requestedPortion = result?.requested_portion ?? null;
+  const requestedPortionText = requestedPortion?.label ?? "Standard serving";
+  const requestedPortionNote =
+    requestedPortion?.approximate && requestedPortion.grams !== null
+      ? `Approx. ${Math.round(requestedPortion.grams)} g water-equivalent.`
+      : null;
   const latencyText = result?.latency_ms?.total
     ? `Fetched in ${result.latency_ms.total.toFixed(0)}ms.`
     : null;
+  const visiblePortionOptions =
+    portionUnit === "oz"
+      ? SOLID_PORTION_OPTIONS
+      : portionUnit === "fl_oz"
+        ? LIQUID_PORTION_OPTIONS
+        : [];
+  const portionHint =
+    portionUnit === "serving"
+      ? "Using the USDA standard serving unless you choose a specific size."
+      : portionUnit === "fl_oz"
+        ? "Liquid sizes use an approximate water-equivalent conversion."
+        : "Solid sizes are converted from ounces to grams before scaling nutrition.";
 
   function openFilePicker() {
     inputRef.current?.click();
@@ -178,6 +263,13 @@ export function SnapCalConsole() {
                     Estimated Calories:{" "}
                     <span className="result-emphasis">{estimatedCalories}</span>
                   </p>
+                  <p className="result-line">
+                    Portion used:{" "}
+                    <span className="result-emphasis">{requestedPortionText}</span>
+                  </p>
+                  {requestedPortionNote ? (
+                    <p className="result-muted">{requestedPortionNote}</p>
+                  ) : null}
                   {latencyText ? (
                     <p className="result-muted">{latencyText}</p>
                   ) : null}
@@ -185,6 +277,42 @@ export function SnapCalConsole() {
               </>
             ) : null}
           </button>
+
+          <div className="portion-controls">
+            <label className="field" htmlFor="portion-unit">
+              <span className="field-label">Portion</span>
+              <select
+                id="portion-unit"
+                className="input"
+                value={portionUnit}
+                onChange={onPortionUnitChange}
+              >
+                <option value="serving">Standard serving</option>
+                <option value="oz">Solid food</option>
+                <option value="fl_oz">Liquid</option>
+              </select>
+            </label>
+
+            {portionUnit !== "serving" ? (
+              <label className="field" htmlFor="portion-value">
+                <span className="field-label">Size</span>
+                <select
+                  id="portion-value"
+                  className="input"
+                  value={portionValue}
+                  onChange={onPortionValueChange}
+                >
+                  {visiblePortionOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+
+            <p className="field-hint">{portionHint}</p>
+          </div>
 
           {error ? <p className="warning-line">{error}</p> : null}
 

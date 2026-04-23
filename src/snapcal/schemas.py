@@ -15,13 +15,18 @@ class NutritionFacts:
     carbs_g: Optional[float]
     fat_g: Optional[float]
 
-    def scaled(self, multiplier: float) -> "NutritionFacts":
+    def scaled(
+        self,
+        multiplier: float,
+        serving_size_g: Optional[float] = None,
+        serving_unit: Optional[str] = None,
+    ) -> "NutritionFacts":
         def scale(value: Optional[float]) -> Optional[float]:
             return None if value is None else round(value * multiplier, 2)
 
         return NutritionFacts(
-            serving_size_g=scale(self.serving_size_g),
-            serving_unit=self.serving_unit,
+            serving_size_g=serving_size_g if serving_size_g is not None else scale(self.serving_size_g),
+            serving_unit=serving_unit or self.serving_unit,
             calories_kcal=scale(self.calories_kcal),
             protein_g=scale(self.protein_g),
             carbs_g=scale(self.carbs_g),
@@ -38,10 +43,19 @@ class ClassPrediction:
 
 
 @dataclass(frozen=True)
+class RequestedPortion:
+    unit: str
+    value: Optional[int]
+    label: str
+    grams: Optional[float]
+    approximate: bool
+
+
+@dataclass(frozen=True)
 class PredictionResponse:
     selected_class: str
     top_predictions: List[ClassPrediction]
-    portion_multiplier: float
+    requested_portion: RequestedPortion
     model_version: str
     segmentation_preview_url: Optional[str] = None
     latency_ms: Dict[str, float] = field(default_factory=dict)

@@ -77,7 +77,25 @@ Prediction test:
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/predict \
   -F "image=@/absolute/path/to/test-image.jpg" \
-  -F "portion_multiplier=1.0"
+  -F "portion_unit=serving"
+```
+
+Solid food example:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/predict \
+  -F "image=@/absolute/path/to/test-image.jpg" \
+  -F "portion_unit=oz" \
+  -F "portion_value=8"
+```
+
+Liquid example:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/predict \
+  -F "image=@/absolute/path/to/test-image.jpg" \
+  -F "portion_unit=fl_oz" \
+  -F "portion_value=8"
 ```
 
 ## 6. Run the frontend locally

@@ -49,7 +49,7 @@ Modern transfer learning methods provide strong starting points for this task. R
 
 Segmentation is a natural preprocessing step for meal images because it can suppress irrelevant context before classification. Segment Anything introduced a foundation-model approach to generic segmentation \cite{kirillov2023sam}, and MobileSAM made that idea more practical for resource-constrained workflows \cite{mobilesam2023}. In SnapCal, the segmentation stage was not treated as the final task itself; instead, it acted as a front-end filter designed to isolate food pixels, improve focus on the meal, and potentially boost classifier robustness.
 
-The nutrition stage relied on USDA FoodData Central \cite{usdafdc}, which provided serving-based calorie and macronutrient references. Rather than attempting direct calorie regression from pixels, the project used a class-to-nutrition mapping approach: first classify the meal, then retrieve nutrition estimates for a standard serving, then scale the result by portion multiplier. This design made the system easier to inspect, debug, and extend.
+The nutrition stage relied on USDA FoodData Central \cite{usdafdc}, which provided serving-based calorie and macronutrient references. Rather than attempting direct calorie regression from pixels, the project used a class-to-nutrition mapping approach: first classify the meal, then retrieve nutrition estimates for a standard serving, then optionally convert a user-selected preset portion to grams before scaling the result. This design made the system easier to inspect, debug, and extend.
 
 \section{Methodology}
 
@@ -125,7 +125,7 @@ Table~\ref{tab:training-config} summarizes the three configuration levels most r
 For the pilot ablation, the segmentation stage used a faster local MobileSAM configuration with fewer prompt points and no crop-layer recursion so that preprocessing could finish within a single local work session. That speed-oriented setting is useful for a preliminary ablation, but it is not equivalent to a final full-dataset segmentation study.
 
 \subsection{Nutrition and Calorie Estimation}
-The calorie estimation stage mapped each Food-101 class to an entry in USDA FoodData Central \cite{usdafdc}. Each mapping row stored serving size, calories, protein, carbohydrates, fat, and metadata about mapping confidence. At inference time, the system returned the top predictions, looked up the corresponding standard-serving nutrition facts, and then scaled those values by a user-selected portion multiplier.
+The calorie estimation stage mapped each Food-101 class to an entry in USDA FoodData Central \cite{usdafdc}. Each mapping row stored serving size, calories, protein, carbohydrates, fat, and metadata about mapping confidence. At inference time, the system returned the top predictions, looked up the corresponding standard-serving nutrition facts, and then scaled those values according to a user-selected preset portion. Solid-food presets were expressed in ounces, while liquid presets were expressed in fluid ounces using a fixed water-equivalent gram conversion.
 
 This design kept the calorie pipeline interpretable because it made every nutrition estimate traceable to a specific class prediction and a specific reference entry. At the same time, it introduced a dependency on the quality of the Food-101-to-USDA mapping table. In the repository version used for this report, 74 of 101 classes were populated with auto-filled USDA matches, while 27 classes were still marked for manual curation. That incomplete coverage, together with the missing external calorie-evaluation protocol, is the main reason calorie MAE remains future work in this report.
 
@@ -139,7 +139,7 @@ The final system was implemented as a monorepo with four main layers:
 \item a Next.js frontend that handled image upload, camera capture, result display, and portion-size adjustment
 \end{itemize}
 
-The backend loaded an exported inference bundle containing the model weights, metadata, optional segmentation config, and nutrition mapping. The frontend sent an image and portion multiplier to the API, and the API returned the selected class, top predictions, nutrition facts, and latency metrics. This architecture aligned with the original goal of deploying an end-to-end meal analysis application, even though the strongest fully verified full-dataset experiment in this report focused on the raw-image baseline.
+The backend loaded an exported inference bundle containing the model weights, metadata, optional segmentation config, and nutrition mapping. The frontend sent an image together with a discrete portion selection to the API, and the API returned the selected class, top predictions, nutrition facts, the applied portion summary, and latency metrics. This architecture aligned with the original goal of deploying an end-to-end meal analysis application, even though the strongest fully verified full-dataset experiment in this report focused on the raw-image baseline.
 
 Figure~\ref{fig:pipeline} shows the system pipeline at a high level.
 
@@ -273,9 +273,9 @@ Figure~\ref{fig:frontend} is reserved for a final application screenshot.
   \centering
   \fbox{\parbox[c][1.4in][c]{0.95\linewidth}{\centering
   Placeholder screenshot for the final frontend.\\
-  Replace with the SnapCal UI showing image upload, predicted class, nutrition results, and portion-size control.}}
+  Replace with the SnapCal UI showing image upload, predicted class, nutrition results, and the preset portion selectors for standard serving, solid ounces, and liquid fluid ounces.}}
   \caption{Frontend placeholder. A future revision can replace this box with a screenshot of the completed SnapCal interface.}
-  \Description{A placeholder screenshot box for the SnapCal frontend showing upload controls, prediction output, nutrition values, and portion-size adjustment.}
+  \Description{A placeholder screenshot box for the SnapCal frontend showing upload controls, prediction output, nutrition values, and preset portion selectors for standard serving, solid ounces, and liquid fluid ounces.}
   \label{fig:frontend}
 \end{figure}
 

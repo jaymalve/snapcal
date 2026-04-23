@@ -40,5 +40,5 @@ serving size" this para - done
 4. Verify if its according to the requirements
 5. How to remove the water mark - done
 6. Padding in pipeline diagram header. - done
-7. Portion size control in the frontend.
+7. Portion size control in the frontend. - done
 8. Fix title of the report - done

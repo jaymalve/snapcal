@@ -97,7 +97,12 @@ class LocalInferenceService:
             "bundle_dir": str(self.bundle_dir),
         }
 
-    def predict(self, image_bytes: bytes, portion_multiplier: float = 1.0):
+    def predict(
+        self,
+        image_bytes: bytes,
+        portion_unit: str = "serving",
+        portion_value: Optional[int] = None,
+    ):
         try:
             import torch
         except ImportError as exc:  # pragma: no cover - depends on optional dependency
@@ -132,7 +137,8 @@ class LocalInferenceService:
         ]
         return self.nutrition.build_response(
             ranked_predictions=ranked_predictions,
-            portion_multiplier=portion_multiplier,
+            requested_portion_unit=portion_unit,
+            requested_portion_value=portion_value,
             model_version=self.metadata.model_version,
             segmentation_preview_url=segmentation_preview_url,
             latency_ms={

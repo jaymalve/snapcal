@@ -7,8 +7,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
-from .constants import FOOD101_CLASSES, USDA_MAPPING_COLUMNS
-from .schemas import ClassPrediction, NutritionFacts, PredictionResponse
+from .constants import (
+    FLUID_OUNCE_TO_GRAMS_APPROX,
+    FOOD101_CLASSES,
+    OUNCE_TO_GRAMS,
+    PORTION_UNIT_FL_OZ,
+    PORTION_UNIT_OZ,
+    PORTION_UNIT_SERVING,
+    USDA_MAPPING_COLUMNS,
+)
+from .schemas import ClassPrediction, NutritionFacts, PredictionResponse, RequestedPortion
 
 
 def _parse_optional_float(raw_value: str) -> Optional[float]:
@@ -97,7 +105,8 @@ class NutritionLookup:
     def build_response(
         self,
         ranked_predictions: Iterable[Tuple[str, float]],
-        portion_multiplier: float,
+        requested_portion_unit: str,
+        requested_portion_value: Optional[int],
         model_version: str,
         segmentation_preview_url: Optional[str] = None,
         latency_ms: Optional[Dict[str, float]] = None,
@@ -105,6 +114,7 @@ class NutritionLookup:
     ) -> PredictionResponse:
         predictions: List[ClassPrediction] = []
         ranked_list = list(ranked_predictions)
+        requested_portion = build_requested_portion(requested_portion_unit, requested_portion_value)
         for class_name, confidence in ranked_list:
             entry = self.get(class_name)
             per_serving = entry.nutrition_facts()
@@ -113,7 +123,7 @@ class NutritionLookup:
                     class_name=class_name,
                     confidence=round(confidence, 6),
                     nutrition_per_serving=per_serving,
-                    nutrition_adjusted=per_serving.scaled(portion_multiplier),
+                    nutrition_adjusted=build_adjusted_nutrition(per_serving, requested_portion),
                 )
             )
         if not predictions:
@@ -121,7 +131,7 @@ class NutritionLookup:
         return PredictionResponse(
             selected_class=predictions[0].class_name,
             top_predictions=predictions,
-            portion_multiplier=portion_multiplier,
+            requested_portion=requested_portion,
             model_version=model_version,
             segmentation_preview_url=segmentation_preview_url,
             latency_ms=latency_ms or {},
@@ -133,3 +143,65 @@ def calorie_absolute_error(expected_kcal: float, predicted_kcal: Optional[float]
     if predicted_kcal is None:
         return None
     return abs(expected_kcal - predicted_kcal)
+
+
+def build_requested_portion(unit: str, value: Optional[int]) -> RequestedPortion:
+    if unit == PORTION_UNIT_SERVING:
+        return RequestedPortion(
+            unit=unit,
+            value=None,
+            label="Standard serving",
+            grams=None,
+            approximate=False,
+        )
+    if value is None:
+        raise ValueError("portion value is required for non-standard portions")
+    if unit == PORTION_UNIT_OZ:
+        return RequestedPortion(
+            unit=unit,
+            value=value,
+            label=_format_solid_portion_label(value),
+            grams=round(value * OUNCE_TO_GRAMS, 2),
+            approximate=False,
+        )
+    if unit == PORTION_UNIT_FL_OZ:
+        return RequestedPortion(
+            unit=unit,
+            value=value,
+            label=f"{value} fl oz",
+            grams=round(value * FLUID_OUNCE_TO_GRAMS_APPROX, 2),
+            approximate=True,
+        )
+    raise ValueError(f"Unsupported portion unit: {unit}")
+
+
+def build_adjusted_nutrition(per_serving: NutritionFacts, requested_portion: RequestedPortion) -> NutritionFacts:
+    if requested_portion.unit == PORTION_UNIT_SERVING:
+        return per_serving
+    if requested_portion.grams is None:
+        raise ValueError("requested portion grams are required for non-standard portions")
+    if per_serving.serving_size_g in (None, 0):
+        return NutritionFacts(
+            serving_size_g=requested_portion.grams,
+            serving_unit=requested_portion.label,
+            calories_kcal=None,
+            protein_g=None,
+            carbs_g=None,
+            fat_g=None,
+        )
+    multiplier = requested_portion.grams / per_serving.serving_size_g
+    return per_serving.scaled(
+        multiplier,
+        serving_size_g=requested_portion.grams,
+        serving_unit=requested_portion.label,
+    )
+
+
+def _format_solid_portion_label(total_ounces: int) -> str:
+    if total_ounces < 16:
+        return f"{total_ounces} oz"
+    pounds, ounces = divmod(total_ounces, 16)
+    pound_label = f"{pounds} lb"
+    if ounces == 0:
+        return f"{total_ounces} oz ({pound_label})"
+    return f"{total_ounces} oz ({pound_label} {ounces} oz)"

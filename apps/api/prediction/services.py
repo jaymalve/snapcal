@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 import os
 from pathlib import Path
+from typing import Optional
 
 from snapcal.inference import InferenceNotReadyError, LocalInferenceService
 
@@ -37,8 +38,12 @@ class PredictionRuntime:
                 "error": str(exc),
             }
 
-    def predict(self, image_bytes: bytes, portion_multiplier: float):
-        return self._load_service().predict(image_bytes=image_bytes, portion_multiplier=portion_multiplier)
+    def predict(self, image_bytes: bytes, portion_unit: str, portion_value: Optional[int]):
+        return self._load_service().predict(
+            image_bytes=image_bytes,
+            portion_unit=portion_unit,
+            portion_value=portion_value,
+        )
 
 
 @lru_cache(maxsize=1)

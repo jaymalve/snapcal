@@ -4,10 +4,46 @@ from __future__ import annotations
 
 from rest_framework import serializers
 
+from snapcal.constants import (
+    LIQUID_PORTION_FLUID_OUNCE_VALUES,
+    PORTION_UNIT_FL_OZ,
+    PORTION_UNIT_OZ,
+    PORTION_UNIT_SERVING,
+    SOLID_PORTION_OUNCE_VALUES,
+)
+
 
 class PredictRequestSerializer(serializers.Serializer):
     image = serializers.ImageField()
-    portion_multiplier = serializers.FloatField(default=1.0, min_value=0.01)
+    portion_unit = serializers.ChoiceField(
+        choices=(
+            (PORTION_UNIT_SERVING, PORTION_UNIT_SERVING),
+            (PORTION_UNIT_OZ, PORTION_UNIT_OZ),
+            (PORTION_UNIT_FL_OZ, PORTION_UNIT_FL_OZ),
+        ),
+        default=PORTION_UNIT_SERVING,
+    )
+    portion_value = serializers.IntegerField(required=False, allow_null=True, min_value=1)
+
+    def validate(self, attrs):
+        unit = attrs.get("portion_unit", PORTION_UNIT_SERVING)
+        value = attrs.get("portion_value")
+        if unit == PORTION_UNIT_SERVING:
+            attrs["portion_value"] = None
+            return attrs
+        if value is None:
+            raise serializers.ValidationError(
+                {"portion_value": "Choose one of the preset portion sizes for the selected unit."}
+            )
+        allowed_values = (
+            SOLID_PORTION_OUNCE_VALUES if unit == PORTION_UNIT_OZ else LIQUID_PORTION_FLUID_OUNCE_VALUES
+        )
+        if value not in allowed_values:
+            allowed_text = ", ".join(str(option) for option in allowed_values)
+            raise serializers.ValidationError(
+                {"portion_value": f"Allowed values for {unit} are: {allowed_text}."}
+            )
+        return attrs
 
 
 class NutritionFactsSerializer(serializers.Serializer):
@@ -26,10 +62,18 @@ class ClassPredictionSerializer(serializers.Serializer):
     nutrition_adjusted = NutritionFactsSerializer()
 
 
+class RequestedPortionSerializer(serializers.Serializer):
+    unit = serializers.CharField()
+    value = serializers.IntegerField(allow_null=True)
+    label = serializers.CharField()
+    grams = serializers.FloatField(allow_null=True)
+    approximate = serializers.BooleanField()
+
+
 class PredictionResponseSerializer(serializers.Serializer):
     selected_class = serializers.CharField()
     top_predictions = ClassPredictionSerializer(many=True)
-    portion_multiplier = serializers.FloatField()
+    requested_portion = RequestedPortionSerializer()
     model_version = serializers.CharField()
     segmentation_preview_url = serializers.CharField(allow_null=True, required=False)
     latency_ms = serializers.DictField(child=serializers.FloatField(), required=False)
