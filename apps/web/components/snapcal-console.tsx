@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 
 type NutritionFacts = {
   calories_kcal: number | null;
@@ -47,6 +47,7 @@ export function SnapCalConsole() {
   const [result, setResult] = useState<PredictionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!file) {
@@ -68,7 +69,7 @@ export function SnapCalConsole() {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!file) {
-      setError("Choose a meal photo before running inference.");
+      setError("Choose an image before running inference.");
       return;
     }
     setIsSubmitting(true);
@@ -81,7 +82,7 @@ export function SnapCalConsole() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/predict`, {
         method: "POST",
-        body: formData,
+        body: formData
       });
       const payload = (await response.json()) as PredictionResponse & {
         detail?: string;
@@ -89,7 +90,7 @@ export function SnapCalConsole() {
       if (!response.ok) {
         throw new Error(
           payload.detail ??
-            "Inference service is not ready yet. Export a model bundle first.",
+            "Inference service is not ready yet. Export a model bundle first."
         );
       }
       setResult(payload);
@@ -117,75 +118,79 @@ export function SnapCalConsole() {
     ? `Fetched in ${result.latency_ms.total.toFixed(0)}ms.`
     : null;
 
+  function openFilePicker() {
+    inputRef.current?.click();
+  }
+
   return (
     <main className="page-shell">
       <section className="hero">
-        <span className="eyebrow">SAM-guided meal intelligence</span>
-        <h1 className="headline">Segment the plate. Classify the meal. Estimate the calories.</h1>
-        <p className="lede">
-          SnapCal isolates the meal, classifies it, and returns a calorie
-          estimate from a single photo. Upload a meal and run inference to see
-          the detected dish directly on the image.
-        </p>
+        <h2 className="headline">
+          Ultra-fast
+          <br /> meal calories estimation.
+        </h2>
       </section>
 
       <section className="grid">
-        <form className="panel panel-strong upload-panel stack" onSubmit={onSubmit}>
-          <div>
-            <label className="label" htmlFor="image-upload">
-              Meal photo
-            </label>
-            <div className={`dropzone${previewUrl ? " dropzone-filled" : ""}`}>
-              {previewUrl ? (
-                <Image
-                  className="dropzone-image"
-                  src={previewUrl}
-                  alt="Selected meal preview"
-                  fill
-                  unoptimized
-                  sizes="(max-width: 768px) 100vw, 760px"
-                />
-              ) : (
-                <div className="dropzone-empty">
-                  <strong>Upload a photo or open the camera.</strong>
-                  <p>
-                    The backend expects the full SnapCal inference bundle before
-                    live predictions will succeed.
+        <form className="panel panel-strong upload-panel" onSubmit={onSubmit}>
+          <input
+            ref={inputRef}
+            id="image-upload"
+            className="file-input-hidden"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={onFileChange}
+          />
+
+          <button
+            className={`dropzone dropzone-button${previewUrl ? " dropzone-filled" : ""}`}
+            type="button"
+            onClick={openFilePicker}
+            aria-label={
+              previewUrl ? "Replace selected image" : "Choose an image to analyze"
+            }
+          >
+            {previewUrl ? (
+              <Image
+                className="dropzone-image"
+                src={previewUrl}
+                alt="Selected meal preview"
+                fill
+                unoptimized
+                sizes="(max-width: 768px) 100vw, 760px"
+              />
+            ) : (
+              <div className="dropzone-empty">
+                <strong>Tap or click to upload an image.</strong>
+              </div>
+            )}
+
+            {previewUrl && result ? (
+              <>
+                <div className="dropzone-scrim" aria-hidden="true" />
+                <div className="result-drawer">
+                  <p className="result-line">
+                    Detected meal:{" "}
+                    <span className="result-emphasis">{detectedMeal}</span>
                   </p>
+                  <p className="result-line">
+                    Estimated Calories:{" "}
+                    <span className="result-emphasis">{estimatedCalories}</span>
+                  </p>
+                  {latencyText ? (
+                    <p className="result-muted">{latencyText}</p>
+                  ) : null}
                 </div>
-              )}
+              </>
+            ) : null}
+          </button>
 
-              {previewUrl && result ? (
-                <>
-                  <div className="dropzone-scrim" aria-hidden="true" />
-                  <div className="result-drawer">
-                    <p className="result-line">
-                      Detected meal: <span className="result-emphasis">{detectedMeal}</span>
-                    </p>
-                    <p className="result-line">
-                      Estimated Calories: <span className="result-emphasis">{estimatedCalories}</span>
-                    </p>
-                    {latencyText ? <p className="result-muted">{latencyText}</p> : null}
-                  </div>
-                </>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="controls">
-            <input
-              id="image-upload"
-              className="file-input"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={onFileChange}
-            />
-            <button className="button" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Analyzing..." : "Run SnapCal"}
-            </button>
-          </div>
           {error ? <p className="warning-line">{error}</p> : null}
+
+          <button className="button" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Analyzing..." : "Run SnapCal"}
+          </button>
         </form>
       </section>
     </main>
