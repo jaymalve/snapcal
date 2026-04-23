@@ -15,7 +15,7 @@
 \setlength{\emergencystretch}{2em}
 \setstretch{1.5}
 
-\title{SnapCal: SAM-Guided Food Recognition and Calorie Estimation from Meal Photographs}
+\title{SnapCal: Food Recognition and Calorie Estimation from Meal Photographs}
 
 \author{Jay Malve}
 \email{jama1639@colorado.edu}
@@ -283,8 +283,6 @@ Figure~\ref{fig:frontend} is reserved for a final application screenshot.
 Several aspects of the project worked well. First, the repository matured into a complete end-to-end system rather than stopping at an isolated notebook experiment. The project implemented manifest generation, optional segmentation, model training, evaluation, bundle export, API inference, and frontend interaction in a single reproducible codebase. Second, the verified ResNet-50 raw baseline was strong enough to validate the core learning setup. A top-1 accuracy of 84.83\% and top-5 accuracy of 97.00\% indicated that the training and evaluation pipeline was functioning well and that transfer learning on Food-101 was effective.
 
 The project also surfaced several limitations. The most important experimental limitation was compute scale. The report now includes a preliminary segmented-input pilot ablation, but that study was run on a reduced 808-image manifest with a speed-oriented local segmentation config rather than on the full Food-101 dataset. That means the central research question --- whether SAM-guided preprocessing materially improves recognition quality at full scale --- is still only partially answered in this version. Similarly, the calorie-estimation stage depended on a mapping table that still required manual curation for part of the label set and on an evaluation protocol that had not yet been formalized, which prevented a strong calorie MAE claim.
-
-Another useful insight is that the project evolved slightly from the original proposal while still preserving its core goal. The proposal described a FastAPI backend, but the final production backend was implemented in Django. That change did not weaken the system; in practice, the Django API cleanly exposed health and prediction endpoints and integrated well with the exported bundle format. The project also finalized portion-size support as part of the application workflow so that nutrition output could be scaled beyond the default serving size.
 
 Overall, the baseline results and system implementation suggest that the project succeeded as both a research platform and a deployable prototype. The report now contains both a strong verified full-dataset raw baseline and a preliminary local raw-versus-segmented pilot, but the final full-scale segmentation question remains future work rather than a closed result.
 

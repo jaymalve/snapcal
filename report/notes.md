@@ -34,11 +34,11 @@ in practice, the Django API cleanly exposed health and prediction
 endpoints and integrated well with the exported bundle format. The
 project also finalized portion-size support as part of the application
 workflow so that nutrition output could be scaled beyond the default
-serving size" this para
+serving size" this para - done
 2. add frontend UI screenshot
 3. Update confusion matrix pairs
 4. Verify if its according to the requirements
-5. How to remove the water mark
-6. Padding in pipeline diagram header.
+5. How to remove the water mark - done
+6. Padding in pipeline diagram header. - done
 7. Portion size control in the frontend.
-8. Fix title of the report
+8. Fix title of the report - done

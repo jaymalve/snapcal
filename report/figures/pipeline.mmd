@@ -1,6 +1,9 @@
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "Helvetica, Arial, sans-serif", "background": "#ffffff", "primaryColor": "#ffffff", "primaryTextColor": "#000000", "primaryBorderColor": "#000000", "secondaryColor": "#ffffff", "secondaryTextColor": "#000000", "secondaryBorderColor": "#000000", "tertiaryColor": "#ffffff", "tertiaryTextColor": "#000000", "tertiaryBorderColor": "#000000", "lineColor": "#000000", "textColor": "#000000", "mainBkg": "#ffffff", "nodeBorder": "#000000", "clusterBkg": "#ffffff", "clusterBorder": "#000000", "edgeLabelBackground": "#ffffff"}, "flowchart": {"curve": "linear", "nodeSpacing": 28, "rankSpacing": 35}}}%%
 flowchart TB
-  subgraph Offline[Offline Research Pipeline]
+  classDef sectionTitle fill:#ffffff,stroke:none,color:#000000,font-weight:bold,font-size:16px;
+
+  subgraph Offline[ ]
+    OT[Offline Research Pipeline]:::sectionTitle
     D[Food-101 dataset]
     M[Build canonical manifest]
     S[Optional MobileSAM preprocessing]
@@ -8,6 +11,7 @@ flowchart TB
     E[Evaluate predictions and export best checkpoint]
     B[Inference bundle\nweights + metadata + nutrition mapping]
 
+    OT --- D
     D --> M
     M --> S
     M --> T
@@ -16,7 +20,8 @@ flowchart TB
     E --> B
   end
 
-  subgraph Online[Online Inference Pipeline]
+  subgraph Online[ ]
+    IT[Online Inference Pipeline]:::sectionTitle
     U[User uploads meal photo]
     F[Next.js frontend]
     A[Django API]
@@ -28,6 +33,7 @@ flowchart TB
     R[Portion scaling]
     O[Prediction response\nclass + nutrition + latency]
 
+    IT --- A
     U --> F
     F -->|image + portion multiplier| A
     A --> P
@@ -42,3 +48,5 @@ flowchart TB
   end
 
   B --> A
+  linkStyle 0 stroke-width:0px,fill:none;
+  linkStyle 7 stroke-width:0px,fill:none;
