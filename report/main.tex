@@ -57,20 +57,20 @@ The nutrition stage relied on USDA FoodData Central \cite{usdafdc}, which provid
 \subsection{Dataset}
 The project used Food-101 \cite{bossard2014food101}, which contains 101,000 images across 101 food categories. The repository generated a canonical manifest file from the Food-101 metadata and then split the official training data into training and validation subsets with a deterministic class-wise shuffle. The resulting manifest contained 68,175 training images, 7,575 validation images, and 25,250 test images. Each manifest row stored the class label, image path, and reserved output paths for segmentation products.
 
-Table~\ref{tab:dataset-summary} summarizes the dataset organization used by the pipeline.
+Table~\ref{tab:dataset-summary} summarizes the dataset split sizes used by the pipeline.
 
 \begin{table}
-  \caption{Dataset summary used by SnapCal. Counts are taken from the generated manifest tracked in the repository.}
+  \caption{Dataset split sizes used by SnapCal.}
   \label{tab:dataset-summary}
-  \begin{tabular}{lrr}
+  \begin{tabular}{lr}
     \toprule
-    Split & Image count & Notes \\
+    Split & Image count \\
     \midrule
-    Train & 68,175 & Deterministic split from official Food-101 training set \\
-    Validation & 7,575 & Held out from official training set \\
-    Test & 25,250 & Official Food-101 test set \\
+    Train & 68,175 \\
+    Validation & 7,575 \\
+    Test & 25,250 \\
     \midrule
-    Total & 101,000 & 101 classes \\
+    Total & 101,000 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -100,12 +100,12 @@ The shared base training configuration used image size 224, batch size 64, 15 ep
 
 Table~\ref{tab:training-config} summarizes the three configuration levels most relevant to this report.
 
-\begin{table}
+\begin{table*}
   \caption{Training configuration summary for the base setup, the verified local baseline, and the matched pilot ablation.}
   \label{tab:training-config}
-  \footnotesize
-  \setlength{\tabcolsep}{3pt}
-  \begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}p{0.23\columnwidth}>{\centering\arraybackslash}p{0.16\columnwidth}>{\centering\arraybackslash}p{0.24\columnwidth}>{\centering\arraybackslash}p{0.23\columnwidth}@{}}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.19\textwidth}@{}}
     \toprule
     Setting & Base & Verified & Pilot \\
     \midrule
@@ -121,7 +121,7 @@ Table~\ref{tab:training-config} summarizes the three configuration levels most r
     Label smoothing & 0.1 & 0.1 & 0.1 \\
     \bottomrule
   \end{tabularx}
-\end{table}
+\end{table*}
 
 For the pilot ablation, the segmentation stage used a faster local MobileSAM configuration with fewer prompt points and no crop-layer recursion so that preprocessing could finish within a single local work session. That speed-oriented setting is useful for a preliminary ablation, but it is not equivalent to a final full-dataset segmentation study.
 

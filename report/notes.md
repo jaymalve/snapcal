@@ -23,3 +23,17 @@
 4. Add a frontend screenshot to the report.
 5. Compile the report and do a final wording pass on the abstract and conclusion.
 6. Also check about what is mentioned about portion control frontend hook.
+
+
+TODO:
+1. remove "Another useful insight is that the project evolved slightly from the
+original proposal while still preserving its core goal. The proposal
+described a FastAPI backend, but the final production backend was
+implemented in Django. That change did not weaken the system;
+in practice, the Django API cleanly exposed health and prediction
+endpoints and integrated well with the exported bundle format. The
+project also finalized portion-size support as part of the application
+workflow so that nutrition output could be scaled beyond the default
+serving size" this para
+2. add frontend UI screenshot
+3. Update confusion matrix pairs
