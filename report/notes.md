@@ -93,7 +93,7 @@ serving size" this para - done
 6. Padding in pipeline diagram header. - done
 7. Portion size control in the frontend. - done
 8. Fix title of the report - done
-9. Refresh latency numbers if the final report needs updated runtime measurements.
+9. Refresh latency numbers if the final report needs updated runtime measurements. - done
 10. Capture a frontend screenshot that shows the segmentation comparison checkbox. - done
 11. Optional: better support the raw-vs-segmented comparison story with one combined collage image showing the raw and segmented states side by side.
 12. Optional: alternatively add a second figure to the report for the comparison story.

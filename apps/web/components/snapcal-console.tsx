@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Skeleton from "react-loading-skeleton";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 
 type PortionUnit = "serving" | "oz" | "fl_oz";
@@ -105,7 +106,9 @@ export function SnapCalConsole() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [enableSegmentation, setEnableSegmentation] = useState(false);
   const [portionUnit, setPortionUnit] = useState<PortionUnit>("serving");
-  const [portionValue, setPortionValue] = useState<string>(defaultPortionValue("oz"));
+  const [portionValue, setPortionValue] = useState<string>(
+    defaultPortionValue("oz")
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -136,7 +139,8 @@ export function SnapCalConsole() {
           setHealth({
             ready: false,
             segmentation_available: false,
-            segmentation_reason: "Could not verify backend segmentation support."
+            segmentation_reason:
+              "Could not verify backend segmentation support."
           });
         }
       }
@@ -159,7 +163,9 @@ export function SnapCalConsole() {
     const nextUnit = event.target.value as PortionUnit;
     setPortionUnit(nextUnit);
     setPortionValue(
-      nextUnit === "serving" ? defaultPortionValue("oz") : defaultPortionValue(nextUnit)
+      nextUnit === "serving"
+        ? defaultPortionValue("oz")
+        : defaultPortionValue(nextUnit)
     );
     setResult(null);
     setError(null);
@@ -261,7 +267,7 @@ export function SnapCalConsole() {
     ? enableSegmentation
       ? "Segmented requests run MobileSAM first, so they can take much longer than just the raw classifier path."
       : "Compare the fast raw classifier path against the slower segmented path when needed."
-    : segmentationReason ?? "Checking backend segmentation support...";
+    : (segmentationReason ?? "Checking backend segmentation support...");
 
   function openFilePicker() {
     inputRef.current?.click();
@@ -271,7 +277,7 @@ export function SnapCalConsole() {
     <main className="page-shell">
       <section className="hero">
         <h2 className="headline">
-          Ultra-fast
+          SAM guided
           <br /> meal calories estimation.
         </h2>
       </section>
@@ -293,7 +299,9 @@ export function SnapCalConsole() {
             type="button"
             onClick={openFilePicker}
             aria-label={
-              previewUrl ? "Replace selected image" : "Choose an image to analyze"
+              previewUrl
+                ? "Replace selected image"
+                : "Choose an image to analyze"
             }
           >
             {previewUrl ? (
@@ -325,12 +333,16 @@ export function SnapCalConsole() {
                   </p>
                   <p className="result-line">
                     Portion used:{" "}
-                    <span className="result-emphasis">{requestedPortionText}</span>
+                    <span className="result-emphasis">
+                      {requestedPortionText}
+                    </span>
                   </p>
                   {processingModeText ? (
                     <p className="result-line">
                       Processing mode:{" "}
-                      <span className="result-emphasis">{processingModeText}</span>
+                      <span className="result-emphasis">
+                        {processingModeText}
+                      </span>
                     </p>
                   ) : null}
                   {requestedPortionNote ? (
@@ -358,7 +370,9 @@ export function SnapCalConsole() {
                   onChange={onSegmentationChange}
                   disabled={!segmentationAvailable || isSubmitting}
                 />
-                <span className="field-label">Enable segmentation comparison</span>
+                <span className="field-label">
+                  Enable segmentation comparison
+                </span>
               </span>
               <span className="field-hint">{segmentationHint}</span>
             </label>
@@ -400,8 +414,25 @@ export function SnapCalConsole() {
 
           {error ? <p className="warning-line">{error}</p> : null}
 
-          <button className="button" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Analyzing..." : "Run SnapCal"}
+          <button
+            className="button"
+            type="submit"
+            disabled={isSubmitting}
+            aria-busy={isSubmitting}
+            aria-label={isSubmitting ? "Analysing..." : undefined}
+          >
+            {isSubmitting ? (
+              <span aria-hidden="true" style={{ display: "inline-block", width: "min(10rem, 58%)", lineHeight: 0 }}>
+                <Skeleton
+                  height={12}
+                  borderRadius={999}
+                  baseColor="rgba(255, 255, 255, 0.22)"
+                  highlightColor="rgba(255, 255, 255, 0.55)"
+                />
+              </span>
+            ) : (
+              "Estimate"
+            )}
           </button>
         </form>
       </section>

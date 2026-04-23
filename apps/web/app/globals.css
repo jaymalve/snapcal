@@ -1,13 +1,13 @@
 :root {
-  --background: linear-gradient(135deg, #f7efe2 0%, #f9f4ea 35%, #dbeee6 100%);
-  --panel: rgba(255, 252, 246, 0.78);
-  --panel-strong: rgba(255, 251, 244, 0.92);
-  --ink: #1f2b22;
-  --muted: #536255;
-  --accent: #c85935;
-  --accent-soft: rgba(200, 89, 53, 0.12);
-  --border: rgba(31, 43, 34, 0.12);
-  --shadow: 0 24px 80px rgba(66, 48, 32, 0.14);
+  --background: #ffffff;
+  --panel: rgba(255, 255, 255, 0.94);
+  --panel-strong: #ffffff;
+  --ink: #000000;
+  --muted: rgba(0, 0, 0, 0.68);
+  --accent: #000000;
+  --accent-soft: rgba(0, 0, 0, 0.06);
+  --border: rgba(0, 0, 0, 0.14);
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -22,16 +22,6 @@ body {
   color: var(--ink);
   background: var(--background);
   font-family: "Avenir Next", "Segoe UI", sans-serif;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(circle at top left, rgba(255, 194, 102, 0.28), transparent 35%),
-    radial-gradient(circle at bottom right, rgba(40, 132, 92, 0.18), transparent 32%);
-  pointer-events: none;
 }
 
 a {
@@ -66,8 +56,8 @@ select {
   width: fit-content;
   padding: 8px 14px;
   border-radius: 999px;
-  background: rgba(255, 252, 246, 0.74);
-  border: 1px solid rgba(31, 43, 34, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.72rem;
@@ -76,7 +66,7 @@ select {
 .headline {
   max-width: 760px;
   font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  font-size: clamp(2.6rem, 5vw, 4.8rem);
+  font-size: clamp(2.2rem, 4.4vw, 4rem);
   line-height: 0.96;
   margin: 0;
 }
@@ -101,7 +91,7 @@ select {
   backdrop-filter: blur(24px);
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 28px;
+  border-radius: 22px;
   /* box-shadow: var(--shadow); */
 }
 
@@ -129,11 +119,9 @@ select {
   flex: 1;
   place-items: center;
   min-height: 320px;
-  border: 1.5px dashed rgba(31, 43, 34, 0.18);
-  border-radius: 24px;
-  background:
-    linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.18)),
-    rgba(255, 255, 255, 0.36);
+  border: 1.5px dashed rgba(0, 0, 0, 0.18);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
   overflow: hidden;
   isolation: isolate;
 }
@@ -147,13 +135,13 @@ select {
 }
 
 .dropzone-button:focus-visible {
-  outline: 3px solid rgba(200, 89, 53, 0.3);
+  outline: 3px solid rgba(0, 0, 0, 0.22);
   outline-offset: 4px;
 }
 
 .dropzone-filled {
   border-style: solid;
-  border-color: rgba(31, 43, 34, 0.1);
+  border-color: rgba(0, 0, 0, 0.14);
 }
 
 .dropzone-image {
@@ -213,9 +201,9 @@ select {
   display: grid;
   gap: 8px;
   padding: 14px 16px;
-  border: 1px solid rgba(31, 43, 34, 0.1);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  background: #ffffff;
 }
 
 .checkbox-field-disabled {
@@ -232,7 +220,7 @@ select {
   width: 18px;
   height: 18px;
   margin: 0;
-  accent-color: #b4492a;
+  accent-color: #000000;
 }
 
 .field-label {
@@ -252,10 +240,10 @@ select {
 .file-input,
 .button {
   width: 100%;
-  border-radius: 16px;
-  border: 1px solid rgba(31, 43, 34, 0.14);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
   padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.86);
+  background: #ffffff;
   color: var(--ink);
 }
 
@@ -263,16 +251,21 @@ select {
   border: none;
   cursor: pointer;
   min-height: 56px;
-  background: linear-gradient(135deg, #d86840, #b4492a);
-  color: white;
+  background: var(--accent);
+  color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 16px 32px rgba(180, 73, 42, 0.24);
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  box-shadow: none;
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.button > * {
+  position: relative;
+  z-index: 1;
 }
 
 .button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 18px 36px rgba(180, 73, 42, 0.3);
+  background: rgba(0, 0, 0, 0.92);
 }
 
 .button:disabled {
@@ -288,7 +281,7 @@ select {
   display: grid;
   gap: 8px;
   padding: 20px 22px 22px;
-  border-radius: 0 0 24px 24px;
+  border-radius: 0 0 18px 18px;
   z-index: 2;
 }
 
@@ -320,7 +313,7 @@ select {
 }
 
 .warning-line {
-  color: #9a4d1f;
+  color: var(--ink);
   overflow-wrap: anywhere;
 }
 
@@ -335,7 +328,7 @@ select {
   }
 
   .headline {
-    font-size: clamp(2.15rem, 11vw, 3.5rem);
+    font-size: clamp(1.95rem, 9vw, 3rem);
     line-height: 1;
   }
 
@@ -360,7 +353,7 @@ select {
 
   .dropzone {
     min-height: 220px;
-    border-radius: 20px;
+    border-radius: 16px;
   }
 
   .upload-panel {
@@ -369,6 +362,6 @@ select {
 
   .result-drawer {
     padding: 16px 18px 18px;
-    border-radius: 0 0 20px 20px;
+    border-radius: 0 0 16px 16px;
   }
 }
