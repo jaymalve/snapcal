@@ -39,3 +39,6 @@ serving size" this para
 3. Update confusion matrix pairs
 4. Verify if its according to the requirements
 5. How to remove the water mark
+6. Padding in pipeline diagram header.
+7. Portion size control in the frontend.
+8. Fix title of the report

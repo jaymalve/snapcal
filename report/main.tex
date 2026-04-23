@@ -1,4 +1,4 @@
-\documentclass[sigconf,authordraft,nonacm]{acmart}
+\documentclass[sigconf,nonacm]{acmart}
 
 \AtBeginDocument{%
   \providecommand\BibTeX{{%
@@ -15,24 +15,21 @@
 \setlength{\emergencystretch}{2em}
 \setstretch{1.5}
 
-\title[SnapCal Report]{SnapCal: SAM-Guided Food Recognition and Calorie Estimation from Meal Photographs}
+\title{SnapCal: SAM-Guided Food Recognition and Calorie Estimation from Meal Photographs}
 
 \author{Jay Malve}
 \email{jama1639@colorado.edu}
 \affiliation{%
   \institution{University of Colorado Boulder}
-  \city{Boulder}
-  \state{Colorado}
-  \country{USA}
 }
 
-\renewcommand{\shortauthors}{Malve}
+\renewcommand{\shortauthors}{}
 
 \begin{abstract}
 SnapCal is an end-to-end food recognition and calorie estimation system built around Food-101 image classification, USDA nutrition lookup, and a web-based inference workflow. The original project goal was to test whether Segment Anything Model (SAM) guided food isolation could improve classification accuracy and downstream calorie estimation reliability compared to raw-image baselines. To support that goal, the project implemented a reproducible research pipeline that generated Food-101 manifests, supported MobileSAM preprocessing, trained ResNet-50, EfficientNet-B0, and ViT-B/16 classifiers, exported inference bundles, served predictions through a Django API, and exposed the workflow through a Next.js frontend with portion-size control. The strongest fully verified experiment in the repository is a local ResNet-50 raw-image baseline trained on the full Food-101 test split, which achieved 84.83\% top-1 accuracy, 97.00\% top-5 accuracy, and 0.848 macro F1 on 25,250 test images. To probe the segmentation question within local compute limits, this report also includes a matched ResNet-50 pilot ablation on a reduced 808-image stratified manifest. In that pilot, segmented inputs underperformed raw inputs, dropping top-1 accuracy from 15.84\% to 11.88\% and macro F1 from 0.112 to 0.096. The report therefore documents a completed end-to-end system, a strong verified full-dataset baseline, and a preliminary local segmentation result, while deferring full cross-architecture and calorie-estimation studies to future work.
 \end{abstract}
 
-\keywords{food recognition, calorie estimation, computer vision, MobileSAM, Vision Transformer, Django, Next.js}
+% \keywords{food recognition, calorie estimation, computer vision, MobileSAM, Vision Transformer, Django, Next.js}
 
 \begin{document}
 
