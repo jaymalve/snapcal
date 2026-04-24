@@ -249,6 +249,9 @@ select {
 
 .button {
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   min-height: 56px;
   background: var(--accent);

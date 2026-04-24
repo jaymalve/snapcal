@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Skeleton from "react-loading-skeleton";
+import { TailSpin } from "react-loader-spinner";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 
 type PortionUnit = "serving" | "oz" | "fl_oz";
@@ -422,12 +422,13 @@ export function SnapCalConsole() {
             aria-label={isSubmitting ? "Analysing..." : undefined}
           >
             {isSubmitting ? (
-              <span aria-hidden="true" style={{ display: "inline-block", width: "min(10rem, 58%)", lineHeight: 0 }}>
-                <Skeleton
-                  height={12}
-                  borderRadius={999}
-                  baseColor="rgba(255, 255, 255, 0.22)"
-                  highlightColor="rgba(255, 255, 255, 0.55)"
+              <span aria-hidden="true">
+                <TailSpin
+                  height={20}
+                  width={20}
+                  color="#ffffff"
+                  ariaLabel="snapcal-loading"
+                  visible
                 />
               </span>
             ) : (

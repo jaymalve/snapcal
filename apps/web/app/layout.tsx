@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import "react-loading-skeleton/dist/skeleton.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
