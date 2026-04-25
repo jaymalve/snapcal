@@ -56,6 +56,8 @@ class PredictionResponse:
     selected_class: str
     top_predictions: List[ClassPrediction]
     requested_portion: RequestedPortion
+    model_id: str
+    model_name: str
     model_version: str
     segmentation_requested: bool = False
     segmentation_applied: bool = False

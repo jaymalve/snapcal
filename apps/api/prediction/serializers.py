@@ -14,6 +14,7 @@ from snapcal.constants import (
 
 
 class PredictRequestSerializer(serializers.Serializer):
+    model_id = serializers.CharField(required=False)
     image = serializers.ImageField()
     enable_segmentation = serializers.BooleanField(default=False)
     portion_unit = serializers.ChoiceField(
@@ -75,6 +76,8 @@ class PredictionResponseSerializer(serializers.Serializer):
     selected_class = serializers.CharField()
     top_predictions = ClassPredictionSerializer(many=True)
     requested_portion = RequestedPortionSerializer()
+    model_id = serializers.CharField(required=False)
+    model_name = serializers.CharField(required=False)
     model_version = serializers.CharField()
     segmentation_requested = serializers.BooleanField()
     segmentation_applied = serializers.BooleanField()
@@ -83,8 +86,22 @@ class PredictionResponseSerializer(serializers.Serializer):
     warnings = serializers.ListField(child=serializers.CharField(), required=False)
 
 
+class HealthModelSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    label = serializers.CharField()
+    ready = serializers.BooleanField()
+    model_version = serializers.CharField(required=False)
+    model_name = serializers.CharField(required=False)
+    bundle_dir = serializers.CharField(required=False)
+    segmentation_available = serializers.BooleanField(required=False)
+    segmentation_reason = serializers.CharField(required=False, allow_null=True)
+    error = serializers.CharField(required=False)
+
+
 class HealthResponseSerializer(serializers.Serializer):
     ready = serializers.BooleanField()
+    default_model_id = serializers.CharField(required=False, allow_null=True)
+    models = HealthModelSerializer(many=True, required=False)
     model_version = serializers.CharField(required=False)
     model_name = serializers.CharField(required=False)
     bundle_dir = serializers.CharField(required=False)

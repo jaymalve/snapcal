@@ -127,6 +127,7 @@ class LocalInferenceService:
         portion_unit: str = "serving",
         portion_value: Optional[int] = None,
         enable_segmentation: bool = False,
+        model_id: Optional[str] = None,
     ):
         try:
             import torch
@@ -175,6 +176,8 @@ class LocalInferenceService:
             ranked_predictions=ranked_predictions,
             requested_portion_unit=portion_unit,
             requested_portion_value=portion_value,
+            model_id=model_id or self.metadata.model_name,
+            model_name=self.metadata.model_name,
             model_version=self.metadata.model_version,
             segmentation_requested=segmentation_requested,
             segmentation_applied=segmentation_applied,

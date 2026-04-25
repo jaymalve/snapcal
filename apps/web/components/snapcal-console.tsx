@@ -6,6 +6,17 @@ import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 
 type PortionUnit = "serving" | "oz" | "fl_oz";
 
+type ModelOption = {
+  id: string;
+  label: string;
+  ready: boolean;
+  model_name?: string;
+  model_version?: string;
+  segmentation_available?: boolean;
+  segmentation_reason?: string | null;
+  error?: string;
+};
+
 type NutritionFacts = {
   serving_size_g: number | null;
   serving_unit: string;
@@ -34,6 +45,9 @@ type PredictionResponse = {
   selected_class: string;
   top_predictions: ClassPrediction[];
   requested_portion: RequestedPortion;
+  model_id?: string;
+  model_name?: string;
+  model_version?: string;
   segmentation_requested: boolean;
   segmentation_applied: boolean;
   latency_ms?: {
@@ -44,6 +58,8 @@ type PredictionResponse = {
 
 type HealthResponse = {
   ready: boolean;
+  default_model_id?: string | null;
+  models?: ModelOption[];
   segmentation_available?: boolean;
   segmentation_reason?: string | null;
 };
@@ -73,6 +89,12 @@ const LIQUID_PORTION_OPTIONS: PortionOption[] = [
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
 
+const MODEL_LABELS: Record<string, string> = {
+  resnet50: "ResNet-50",
+  efficientnet_b0: "EfficientNet-B0",
+  vit_b16: "ViT-B/16"
+};
+
 function defaultPortionValue(unit: Exclude<PortionUnit, "serving">) {
   return unit === "oz"
     ? String(SOLID_PORTION_OPTIONS[2].value)
@@ -81,6 +103,10 @@ function defaultPortionValue(unit: Exclude<PortionUnit, "serving">) {
 
 function formatLabel(value: string) {
   return value.replaceAll("_", " ");
+}
+
+function formatModelName(value: string) {
+  return MODEL_LABELS[value] ?? capitalizeFirstLetter(formatLabel(value));
 }
 
 function capitalizeFirstLetter(value: string) {
@@ -104,6 +130,7 @@ export function SnapCalConsole() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [selectedModelId, setSelectedModelId] = useState("");
   const [enableSegmentation, setEnableSegmentation] = useState(false);
   const [portionUnit, setPortionUnit] = useState<PortionUnit>("serving");
   const [portionValue, setPortionValue] = useState<string>(
@@ -133,6 +160,14 @@ export function SnapCalConsole() {
         const payload = (await response.json()) as HealthResponse;
         if (isActive) {
           setHealth(payload);
+          setSelectedModelId(
+            (current) =>
+              current ||
+              payload.default_model_id ||
+              payload.models?.find((model) => model.ready)?.id ||
+              payload.models?.[0]?.id ||
+              ""
+          );
         }
       } catch {
         if (isActive) {
@@ -152,9 +187,35 @@ export function SnapCalConsole() {
     };
   }, []);
 
+  const modelOptions = health?.models ?? [];
+  const selectedModel =
+    modelOptions.find((model) => model.id === selectedModelId) ??
+    modelOptions.find((model) => model.id === health?.default_model_id) ??
+    modelOptions.find((model) => model.ready) ??
+    modelOptions[0] ??
+    null;
+  const activeModelId = selectedModelId || selectedModel?.id || "";
+  const selectedModelReady = selectedModel?.ready ?? true;
+  const segmentationAvailable =
+    selectedModel?.segmentation_available ?? health?.segmentation_available ?? false;
+  const segmentationReason =
+    selectedModel?.segmentation_reason ?? health?.segmentation_reason ?? null;
+
+  useEffect(() => {
+    if (enableSegmentation && !segmentationAvailable) {
+      setEnableSegmentation(false);
+    }
+  }, [enableSegmentation, segmentationAvailable]);
+
   function onFileChange(event: ChangeEvent<HTMLInputElement>) {
     const nextFile = event.target.files?.[0] ?? null;
     setFile(nextFile);
+    setResult(null);
+    setError(null);
+  }
+
+  function onModelChange(event: ChangeEvent<HTMLSelectElement>) {
+    setSelectedModelId(event.target.value);
     setResult(null);
     setError(null);
   }
@@ -194,6 +255,9 @@ export function SnapCalConsole() {
     setError(null);
     const formData = new FormData();
     formData.append("image", file);
+    if (activeModelId) {
+      formData.append("model_id", activeModelId);
+    }
     formData.append("enable_segmentation", String(enableSegmentation));
     formData.append("portion_unit", portionUnit);
     if (portionUnit !== "serving") {
@@ -241,6 +305,11 @@ export function SnapCalConsole() {
     requestedPortion?.approximate && requestedPortion.grams !== null
       ? `Approx. ${Math.round(requestedPortion.grams)} g water-equivalent.`
       : null;
+  const modelUsedText = result
+    ? result.model_name
+      ? `${formatModelName(result.model_name)}${result.model_version ? ` (${result.model_version})` : ""}`
+      : result.model_id ?? selectedModel?.label ?? null
+    : null;
   const processingModeText = result
     ? result.segmentation_applied
       ? "Segmented input"
@@ -249,8 +318,6 @@ export function SnapCalConsole() {
   const latencyText = result?.latency_ms?.total
     ? `Fetched in ${result.latency_ms.total.toFixed(0)}ms.`
     : null;
-  const segmentationAvailable = health?.segmentation_available ?? false;
-  const segmentationReason = health?.segmentation_reason ?? null;
   const visiblePortionOptions =
     portionUnit === "oz"
       ? SOLID_PORTION_OPTIONS
@@ -268,6 +335,15 @@ export function SnapCalConsole() {
       ? "Segmented requests run MobileSAM first, so they can take much longer than just the raw classifier path."
       : "Compare the fast raw classifier path against the slower segmented path when needed."
     : (segmentationReason ?? "Checking backend segmentation support...");
+  const selectedModelHint = selectedModel
+    ? selectedModel.ready
+      ? selectedModel.model_version
+        ? `${selectedModel.label}`
+        : selectedModel.label
+      : (selectedModel.error ?? "This model is configured but not ready yet.")
+    : modelOptions.length > 0
+      ? "Choose which classifier to use for this request."
+      : "Checking backend models...";
 
   function openFilePicker() {
     inputRef.current?.click();
@@ -345,6 +421,12 @@ export function SnapCalConsole() {
                       </span>
                     </p>
                   ) : null}
+                  {modelUsedText ? (
+                    <p className="result-line">
+                      Model used:{" "}
+                      <span className="result-emphasis">{modelUsedText}</span>
+                    </p>
+                  ) : null}
                   {requestedPortionNote ? (
                     <p className="result-muted">{requestedPortionNote}</p>
                   ) : null}
@@ -357,6 +439,29 @@ export function SnapCalConsole() {
           </button>
 
           <div className="portion-controls">
+            <label className="field" htmlFor="model-id">
+              <span className="field-label">Model</span>
+              <select
+                id="model-id"
+                className="input"
+                value={activeModelId}
+                onChange={onModelChange}
+                disabled={isSubmitting || modelOptions.length === 0}
+              >
+                {modelOptions.length === 0 ? (
+                  <option value="">Checking backend models...</option>
+                ) : (
+                  modelOptions.map((model) => (
+                    <option key={model.id} value={model.id} disabled={!model.ready}>
+                      {model.ready ? model.label : `${model.label} (Unavailable)`}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
+
+            <p className="field-hint">{selectedModelHint}</p>
+
             <label
               className={`checkbox-field${segmentationAvailable ? "" : " checkbox-field-disabled"}`}
               htmlFor="enable-segmentation"
@@ -417,7 +522,7 @@ export function SnapCalConsole() {
           <button
             className="button"
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !selectedModelReady}
             aria-busy={isSubmitting}
             aria-label={isSubmitting ? "Analysing..." : undefined}
           >
