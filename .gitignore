@@ -3,6 +3,7 @@
 .env.*
 .venv/
 venv/
+.venv-deploy/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -30,4 +31,5 @@ artifacts/
 data/
 
 # just a script to prefill the food101_usda_mapping.csv file
-prefill_food101_usda_mapping.py 
+prefill_food101_usda_mapping.py  
+*.pem

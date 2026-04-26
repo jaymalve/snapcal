@@ -31,7 +31,7 @@ def build_image_transforms(image_size: int, train: bool) -> Callable:
     )
 
 
-def build_model(model_name: str, num_classes: int):
+def build_model(model_name: str, num_classes: int, pretrained: bool = True):
     try:
         import torch.nn as nn
         from torchvision.models import (
@@ -44,24 +44,45 @@ def build_model(model_name: str, num_classes: int):
         raise RuntimeError("torch and torchvision are required for model creation.") from exc
 
     if model_name == "resnet50":
-        model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
+        weights = ResNet50_Weights.IMAGENET1K_V2 if pretrained else None
+        model = resnet50(weights=weights)
         model.fc = nn.Linear(model.fc.in_features, num_classes)
         return model
     if model_name == "efficientnet_b0":
-        model = efficientnet_b0(weights=EfficientNet_B0_Weights.IMAGENET1K_V1)
+        weights = EfficientNet_B0_Weights.IMAGENET1K_V1 if pretrained else None
+        model = efficientnet_b0(weights=weights)
         in_features = model.classifier[1].in_features
         model.classifier[1] = nn.Linear(in_features, num_classes)
         return model
     if model_name == "vit_b16":
         try:
-            from transformers import ViTForImageClassification
+            from transformers import ViTConfig, ViTForImageClassification
         except ImportError as exc:  # pragma: no cover - depends on optional dependency
             raise RuntimeError("transformers is required for ViT training.") from exc
-        return ViTForImageClassification.from_pretrained(
-            "google/vit-base-patch16-224-in21k",
+        if pretrained:
+            return ViTForImageClassification.from_pretrained(
+                "google/vit-base-patch16-224-in21k",
+                num_labels=num_classes,
+                ignore_mismatched_sizes=True,
+            )
+        config = ViTConfig(
+            hidden_size=768,
+            num_hidden_layers=12,
+            num_attention_heads=12,
+            intermediate_size=3072,
+            hidden_act="gelu",
+            hidden_dropout_prob=0.0,
+            attention_probs_dropout_prob=0.0,
+            initializer_range=0.02,
+            layer_norm_eps=1e-12,
+            image_size=224,
+            patch_size=16,
+            num_channels=3,
+            qkv_bias=True,
+            encoder_stride=16,
             num_labels=num_classes,
-            ignore_mismatched_sizes=True,
         )
+        return ViTForImageClassification(config)
     raise ValueError(f"Unsupported model: {model_name}")
 
 

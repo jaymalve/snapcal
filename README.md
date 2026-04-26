@@ -36,7 +36,9 @@ SnapCal is a monorepo for SAM-guided food recognition and calorie estimation fro
 
 ## Deployment Workflow
 
-- `render.yaml` and `build.sh` provide a Render deployment path for the Django API.
+- `render.yaml` and `build.sh` provide a Render deployment path for the Django API when you want local-bundle inference on the backend.
+- `deploy/modal_inference.py` is the Modal deployment entrypoint for hosted classifier inference, with one predict endpoint and one health endpoint per model.
+- `deploy/lightsail/` contains example `systemd`, `nginx`, and environment templates for a Lightsail-hosted Django API that calls Modal remotely.
 - `scripts/fetch_model_bundle.py` optionally downloads and unpacks a zipped or tarred `production_bundle` when `SNAPCAL_MODEL_BUNDLE_URL` is set.
 - The Next.js app already reads `NEXT_PUBLIC_API_BASE_URL` from [apps/web/.env.example](/Users/jaymalave/Desktop/SnapCal/apps/web/.env.example:1), so Vercel only needs that environment variable pointed at your deployed Django API URL.
 
@@ -48,6 +50,14 @@ SnapCal is a monorepo for SAM-guided food recognition and calorie estimation fro
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[api,train,dev]"
+```
+
+### Remote-Only API Backend
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[api_remote]"
 ```
 
 ### Web
@@ -69,6 +79,14 @@ python manage.py runserver
 
 ```bash
 ./build.sh
+```
+
+### Modal Deploy
+
+```bash
+source .venv/bin/activate
+pip install -e ".[deploy]"
+modal deploy deploy/modal_inference.py
 ```
 
 ### ML Scripts

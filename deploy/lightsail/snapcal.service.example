@@ -1,0 +1,15 @@
+[Unit]
+Description=SnapCal Django API
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/snapcal/apps/api
+EnvironmentFile=/opt/snapcal/.env.production
+ExecStart=/opt/snapcal/.venv/bin/gunicorn snapcal_api.asgi:application -k uvicorn.workers.UvicornWorker --workers 1 --bind 127.0.0.1:8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

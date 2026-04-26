@@ -73,7 +73,7 @@ class LocalInferenceService:
         if not self.metadata.checkpoint_path.exists():
             raise InferenceNotReadyError(f"Model checkpoint not found: {self.metadata.checkpoint_path}")
         self._device = resolve_torch_device()
-        model = build_model(self.metadata.model_name, len(FOOD101_CLASSES))
+        model = build_model(self.metadata.model_name, len(FOOD101_CLASSES), pretrained=False)
         checkpoint = torch.load(self.metadata.checkpoint_path, map_location=self._device, weights_only=False)
         model.load_state_dict(checkpoint["model_state"])
         model.to(self._device)
