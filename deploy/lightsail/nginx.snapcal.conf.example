@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name api.example.com;
+    server_name api.snapcal.jaymalve.dev;
 
     client_max_body_size 20M;
 

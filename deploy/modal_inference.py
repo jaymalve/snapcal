@@ -8,7 +8,6 @@ import io
 import json
 import os
 from pathlib import Path
-import sys
 import time
 from typing import Dict, Optional
 
@@ -16,12 +15,9 @@ import modal
 from fastapi import Header, HTTPException
 from pydantic import BaseModel, Field
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT / "src"))
-
-from snapcal.constants import FOOD101_CLASSES
-from snapcal.models import build_image_transforms, build_model, extract_logits
+NUM_CLASSES = 101
+IMAGENET_MEAN = (0.485, 0.456, 0.406)
+IMAGENET_STD = (0.229, 0.224, 0.225)
 
 APP_NAME = os.getenv("SNAPCAL_MODAL_APP_NAME", "snapcal-inference")
 VOLUME_NAME = os.getenv("SNAPCAL_MODAL_VOLUME_NAME", "snapcal-models")
@@ -46,6 +42,7 @@ MODEL_ROOTS = {
     "efficientnet_b0": Path("/models/efficientnet_b0"),
     "vit_b16": Path("/models/vit_b16"),
 }
+VOLUME_ROOT = Path("/models")
 
 
 class PredictRequest(BaseModel):
@@ -68,6 +65,59 @@ _RUNTIME_CACHE: Dict[str, BundleRuntime] = {}
 _METADATA_CACHE: Dict[str, Dict[str, object]] = {}
 
 
+def build_image_transforms(image_size: int):
+    from torchvision import transforms
+
+    return transforms.Compose(
+        [
+            transforms.Resize((image_size, image_size)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+        ]
+    )
+
+
+def build_model(model_name: str, num_classes: int):
+    import torch.nn as nn
+    from torchvision.models import efficientnet_b0, resnet50
+
+    if model_name == "resnet50":
+        model = resnet50(weights=None)
+        model.fc = nn.Linear(model.fc.in_features, num_classes)
+        return model
+    if model_name == "efficientnet_b0":
+        model = efficientnet_b0(weights=None)
+        in_features = model.classifier[1].in_features
+        model.classifier[1] = nn.Linear(in_features, num_classes)
+        return model
+    if model_name == "vit_b16":
+        from transformers import ViTConfig, ViTForImageClassification
+
+        config = ViTConfig(
+            hidden_size=768,
+            num_hidden_layers=12,
+            num_attention_heads=12,
+            intermediate_size=3072,
+            hidden_act="gelu",
+            hidden_dropout_prob=0.0,
+            attention_probs_dropout_prob=0.0,
+            initializer_range=0.02,
+            layer_norm_eps=1e-12,
+            image_size=224,
+            patch_size=16,
+            num_channels=3,
+            qkv_bias=True,
+            encoder_stride=16,
+            num_labels=num_classes,
+        )
+        return ViTForImageClassification(config)
+    raise ValueError(f"Unsupported model: {model_name}")
+
+
+def extract_logits(outputs):
+    return outputs.logits if hasattr(outputs, "logits") else outputs
+
+
 def _authorize(authorization: Optional[str]) -> None:
     expected = os.getenv(AUTH_ENV_KEY, "").strip()
     if not expected:
@@ -84,12 +134,33 @@ def _resolve_bundle_dir(model_id: str) -> Path:
         root = MODEL_ROOTS[model_id]
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Unknown model '{model_id}'.") from exc
-    if (root / "metadata.json").exists():
-        return root
-    candidates = sorted(root.rglob("metadata.json"), key=lambda path: (len(path.parts), str(path)))
-    if not candidates:
-        raise HTTPException(status_code=500, detail=f"No bundle metadata found for model '{model_id}' in {root}.")
-    return candidates[0].parent
+
+    candidate_roots = [root, VOLUME_ROOT]
+    seen_dirs = set()
+    metadata_candidates = []
+    for search_root in candidate_roots:
+        root_key = str(search_root)
+        if root_key in seen_dirs or not search_root.exists():
+            continue
+        seen_dirs.add(root_key)
+        metadata_candidates.extend(search_root.rglob("metadata.json"))
+
+    best_match: Optional[Path] = None
+    for metadata_path in sorted(metadata_candidates, key=lambda path: (len(path.parts), str(path))):
+        try:
+            with metadata_path.open("r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except (OSError, json.JSONDecodeError):
+            continue
+        remote_model_name = payload.get("model_name")
+        if remote_model_name == model_id:
+            return metadata_path.parent
+        if best_match is None:
+            best_match = metadata_path.parent
+
+    if best_match is not None:
+        return best_match
+    raise HTTPException(status_code=500, detail=f"No bundle metadata found for model '{model_id}' under {VOLUME_ROOT}.")
 
 
 def _bundle_metadata(model_id: str) -> Dict[str, object]:
@@ -121,11 +192,11 @@ def _load_runtime(model_id: str) -> BundleRuntime:
     if not checkpoint_path.exists():
         raise HTTPException(status_code=500, detail=f"Checkpoint not found for model '{model_id}': {checkpoint_path}")
 
-    model = build_model(model_name, len(FOOD101_CLASSES), pretrained=False)
+    model = build_model(model_name, NUM_CLASSES)
     checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
     model.load_state_dict(checkpoint["model_state"])
     model.eval()
-    transform = build_image_transforms(image_size, train=False)
+    transform = build_image_transforms(image_size)
     runtime = BundleRuntime(
         bundle_dir=bundle_dir,
         model_name=model_name,
