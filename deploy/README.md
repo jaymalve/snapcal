@@ -14,6 +14,7 @@ This folder contains deployment entrypoints and templates for the hosted SnapCal
 - `lightsail/snapcal.service.example`: `systemd` unit for Gunicorn
 - `lightsail/nginx.snapcal.conf.example`: Nginx reverse proxy config
 - `lightsail/.env.production.remote.example`: remote-inference environment template
+- `lightsail/mobilesam.runtime.json.example`: production MobileSAM config with an absolute checkpoint path for backend-side segmentation
 
 ## Production Split
 
@@ -22,3 +23,12 @@ This folder contains deployment entrypoints and templates for the hosted SnapCal
 - `Modal`: classifier inference endpoints
 
 For the first hosted deployment, keep `SNAPCAL_ENABLE_SEGMENTATION=false` so the backend serves the raw-only path.
+
+To enable the production SAM checkbox later:
+
+1. Copy `artifacts/cache/mobile_sam.pt` to the Lightsail server at `/opt/snapcal/artifacts/cache/mobile_sam.pt`
+2. Copy `lightsail/mobilesam.runtime.json.example` to `/opt/snapcal/deploy/lightsail/mobilesam.runtime.json`
+3. Set `SNAPCAL_ENABLE_SEGMENTATION=true`
+4. Set `SNAPCAL_SEGMENTATION_CONFIG=/opt/snapcal/deploy/lightsail/mobilesam.runtime.json`
+5. Reinstall backend dependencies with `pip install -e ".[api_remote]"`
+6. Restart the `snapcal` systemd service

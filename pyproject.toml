@@ -36,7 +36,12 @@ api_remote = [
   "django-cors-headers>=4.4,<5.0",
   "dj-database-url>=2.2,<3.0",
   "gunicorn>=23.0,<24.0",
+  "mobile_sam @ git+https://github.com/ChaoningZhang/MobileSAM.git",
+  "opencv-python-headless>=4.10,<5.0",
   "psycopg2-binary>=2.9,<3.0",
+  "timm>=0.9,<1.0",
+  "torch>=2.4,<3.0",
+  "torchvision>=0.19,<1.0",
   "uvicorn>=0.35,<1.0",
   "whitenoise>=6.7,<7.0",
 ]

@@ -1,0 +1,14 @@
+{
+  "model_type": "vit_t",
+  "checkpoint_path": "/opt/snapcal/artifacts/cache/mobile_sam.pt",
+  "points_per_side": 32,
+  "pred_iou_thresh": 0.8,
+  "stability_score_thresh": 0.9,
+  "crop_n_layers": 1,
+  "min_mask_region_area": 4096,
+  "min_area_ratio": 0.05,
+  "secondary_mask_score_delta": 0.1,
+  "crop_margin_ratio": 0.05,
+  "output_image_size": 224,
+  "background_fill_rgb": [123, 116, 103]
+}
