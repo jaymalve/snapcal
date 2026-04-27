@@ -370,6 +370,111 @@ export function SnapCalConsole() {
             onChange={onFileChange}
           />
 
+          <div className="console-controls">
+            <div className="portion-controls">
+              <label className="field" htmlFor="model-id">
+                <span className="field-label">Model</span>
+                <select
+                  id="model-id"
+                  className="input"
+                  value={activeModelId}
+                  onChange={onModelChange}
+                  disabled={isSubmitting || modelOptions.length === 0}
+                >
+                  {modelOptions.length === 0 ? (
+                    <option value="">Checking backend models...</option>
+                  ) : (
+                    modelOptions.map((model) => (
+                      <option key={model.id} value={model.id} disabled={!model.ready}>
+                        {model.ready ? model.label : `${model.label} (Unavailable)`}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </label>
+
+              <p className="field-hint">{selectedModelHint}</p>
+
+              <label
+                className={`checkbox-field${segmentationAvailable ? "" : " checkbox-field-disabled"}`}
+                htmlFor="enable-segmentation"
+              >
+                <span className="checkbox-row">
+                  <input
+                    id="enable-segmentation"
+                    className="checkbox-input"
+                    type="checkbox"
+                    checked={enableSegmentation}
+                    onChange={onSegmentationChange}
+                    disabled={!segmentationAvailable || isSubmitting}
+                  />
+                  <span className="field-label">
+                    Enable segmentation comparison
+                  </span>
+                </span>
+                <span className="field-hint">{segmentationHint}</span>
+              </label>
+
+              <label className="field" htmlFor="portion-unit">
+                <span className="field-label">Portion</span>
+                <select
+                  id="portion-unit"
+                  className="input"
+                  value={portionUnit}
+                  onChange={onPortionUnitChange}
+                >
+                  <option value="serving">Standard serving</option>
+                  <option value="oz">Solid food</option>
+                  <option value="fl_oz">Liquid</option>
+                </select>
+              </label>
+
+              {portionUnit !== "serving" ? (
+                <label className="field" htmlFor="portion-value">
+                  <span className="field-label">Size</span>
+                  <select
+                    id="portion-value"
+                    className="input"
+                    value={portionValue}
+                    onChange={onPortionValueChange}
+                  >
+                    {visiblePortionOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+
+              <p className="field-hint">{portionHint}</p>
+            </div>
+
+            {error ? <p className="warning-line">{error}</p> : null}
+
+            <button
+              className="button"
+              type="submit"
+              disabled={isSubmitting || !selectedModelReady}
+              aria-busy={isSubmitting}
+              aria-label={isSubmitting ? "Analysing..." : undefined}
+            >
+              {isSubmitting ? (
+                <span aria-hidden="true">
+                  <TailSpin
+                    height={20}
+                    width={20}
+                    color="#ffffff"
+                    ariaLabel="snapcal-loading"
+                    visible
+                  />
+                </span>
+              ) : (
+                "Estimate"
+              )}
+            </button>
+          </div>
+
           <button
             className={`dropzone dropzone-button${previewUrl ? " dropzone-filled" : ""}`}
             type="button"
@@ -436,109 +541,6 @@ export function SnapCalConsole() {
                 </div>
               </>
             ) : null}
-          </button>
-
-          <div className="portion-controls">
-            <label className="field" htmlFor="model-id">
-              <span className="field-label">Model</span>
-              <select
-                id="model-id"
-                className="input"
-                value={activeModelId}
-                onChange={onModelChange}
-                disabled={isSubmitting || modelOptions.length === 0}
-              >
-                {modelOptions.length === 0 ? (
-                  <option value="">Checking backend models...</option>
-                ) : (
-                  modelOptions.map((model) => (
-                    <option key={model.id} value={model.id} disabled={!model.ready}>
-                      {model.ready ? model.label : `${model.label} (Unavailable)`}
-                    </option>
-                  ))
-                )}
-              </select>
-            </label>
-
-            <p className="field-hint">{selectedModelHint}</p>
-
-            <label
-              className={`checkbox-field${segmentationAvailable ? "" : " checkbox-field-disabled"}`}
-              htmlFor="enable-segmentation"
-            >
-              <span className="checkbox-row">
-                <input
-                  id="enable-segmentation"
-                  className="checkbox-input"
-                  type="checkbox"
-                  checked={enableSegmentation}
-                  onChange={onSegmentationChange}
-                  disabled={!segmentationAvailable || isSubmitting}
-                />
-                <span className="field-label">
-                  Enable segmentation comparison
-                </span>
-              </span>
-              <span className="field-hint">{segmentationHint}</span>
-            </label>
-
-            <label className="field" htmlFor="portion-unit">
-              <span className="field-label">Portion</span>
-              <select
-                id="portion-unit"
-                className="input"
-                value={portionUnit}
-                onChange={onPortionUnitChange}
-              >
-                <option value="serving">Standard serving</option>
-                <option value="oz">Solid food</option>
-                <option value="fl_oz">Liquid</option>
-              </select>
-            </label>
-
-            {portionUnit !== "serving" ? (
-              <label className="field" htmlFor="portion-value">
-                <span className="field-label">Size</span>
-                <select
-                  id="portion-value"
-                  className="input"
-                  value={portionValue}
-                  onChange={onPortionValueChange}
-                >
-                  {visiblePortionOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-
-            <p className="field-hint">{portionHint}</p>
-          </div>
-
-          {error ? <p className="warning-line">{error}</p> : null}
-
-          <button
-            className="button"
-            type="submit"
-            disabled={isSubmitting || !selectedModelReady}
-            aria-busy={isSubmitting}
-            aria-label={isSubmitting ? "Analysing..." : undefined}
-          >
-            {isSubmitting ? (
-              <span aria-hidden="true">
-                <TailSpin
-                  height={20}
-                  width={20}
-                  color="#ffffff"
-                  ariaLabel="snapcal-loading"
-                  visible
-                />
-              </span>
-            ) : (
-              "Estimate"
-            )}
           </button>
         </form>
       </section>

@@ -22,6 +22,7 @@ from snapcal.segmentation import MobileSAMSegmenter
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SEGMENTATION_CONFIG_ENV = "SNAPCAL_SEGMENTATION_CONFIG"
+SEGMENTATION_MAX_SIDE_ENV = "SNAPCAL_SEGMENTATION_MAX_SIDE"
 REMOTE_SEGMENTATION_DISABLED_REASON = (
     "Segmentation is disabled on this backend. Restart with SNAPCAL_ENABLE_SEGMENTATION=true to enable the comparison toggle."
 )
@@ -30,6 +31,15 @@ DEFAULT_TOP_K = 3
 
 _SEGMENTATION_CONFIG_CACHE: Optional[SegmentationConfig] = None
 _SEGMENTER_CACHE: Optional[MobileSAMSegmenter] = None
+
+
+def _segmentation_max_side() -> int:
+    raw_value = (os.getenv(SEGMENTATION_MAX_SIDE_ENV, "1024") or "1024").strip()
+    try:
+        max_side = int(raw_value)
+    except ValueError:
+        return 1024
+    return max(224, max_side)
 
 
 @dataclass(frozen=True)
@@ -121,7 +131,16 @@ class RemotePredictionRuntime:
         segmenter = self._load_segmenter()
         preprocess_start = time.perf_counter()
         with Image.open(io.BytesIO(image_bytes)) as input_image:
-            segmented_image, _mask_image, _meta_json = segmenter.segment_image(input_image.convert("RGB"))
+            image = input_image.convert("RGB")
+            max_side = _segmentation_max_side()
+            width, height = image.size
+            longest_side = max(width, height)
+            if longest_side > max_side:
+                scale = max_side / float(longest_side)
+                resized_width = max(1, round(width * scale))
+                resized_height = max(1, round(height * scale))
+                image = image.resize((resized_width, resized_height), resample=Image.Resampling.LANCZOS)
+            segmented_image, _mask_image, _meta_json = segmenter.segment_image(image)
         buffer = io.BytesIO()
         segmented_image.save(buffer, format="PNG")
         preprocess_ms = (time.perf_counter() - preprocess_start) * 1000.0

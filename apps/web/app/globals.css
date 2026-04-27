@@ -66,8 +66,8 @@ select {
 .headline {
   max-width: 760px;
   font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  font-size: clamp(2.2rem, 4.4vw, 4rem);
-  line-height: 0.96;
+  font-size: clamp(1.85rem, min(3.8vw, 5dvh), 3.15rem);
+  line-height: 0.92;
   margin: 0;
 }
 
@@ -108,6 +108,14 @@ select {
   padding: 28px;
 }
 
+.console-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  order: 2;
+  min-height: 0;
+}
+
 .stack {
   display: grid;
   gap: 16px;
@@ -132,6 +140,7 @@ select {
   cursor: pointer;
   text-align: inherit;
   appearance: none;
+  order: 1;
 }
 
 .dropzone-button:focus-visible {
@@ -320,6 +329,36 @@ select {
   overflow-wrap: anywhere;
 }
 
+@media (min-width: 960px) {
+  .hero,
+  .grid {
+    width: min(100%, 1080px);
+  }
+
+  .upload-panel {
+    display: grid;
+    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: stretch;
+  }
+
+  .upload-panel > .console-controls {
+    grid-column: 1;
+    order: 0;
+  }
+
+  .upload-panel > .console-controls > .button {
+    margin-top: auto;
+  }
+
+  .upload-panel > .dropzone-button {
+    grid-column: 2;
+    grid-row: 1;
+    order: 0;
+    height: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .page-shell {
     padding: 32px 18px calc(32px + env(safe-area-inset-bottom));
@@ -331,8 +370,8 @@ select {
   }
 
   .headline {
-    font-size: clamp(1.95rem, 9vw, 3rem);
-    line-height: 1;
+    font-size: clamp(1.55rem, min(7.2vw, 4.4dvh), 2.35rem);
+    line-height: 0.96;
   }
 
   .lede {

@@ -30,5 +30,6 @@ To enable the production SAM checkbox later:
 2. Copy `lightsail/mobilesam.runtime.json.example` to `/opt/snapcal/deploy/lightsail/mobilesam.runtime.json`
 3. Set `SNAPCAL_ENABLE_SEGMENTATION=true`
 4. Set `SNAPCAL_SEGMENTATION_CONFIG=/opt/snapcal/deploy/lightsail/mobilesam.runtime.json`
-5. Reinstall backend dependencies with `pip install -e ".[api_remote]"`
-6. Restart the `snapcal` systemd service
+5. Optionally set `SNAPCAL_SEGMENTATION_MAX_SIDE=1024` to downscale large uploads before SAM runs
+6. Reinstall backend dependencies with `pip install -e ".[api_remote]"`
+7. Restart the `snapcal` systemd service
