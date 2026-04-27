@@ -1,4 +1,4 @@
-\documentclass[sigconf,nonacm]{acmart}
+\documentclass[sigconf,nonacm,11pt]{acmart}
 
 \AtBeginDocument{%
   \providecommand\BibTeX{{%
@@ -40,7 +40,7 @@ SnapCal is an end-to-end food recognition and calorie estimation system built ar
 Estimating the nutritional content of a meal from a photograph is a useful computer vision problem with practical applications in dietary tracking, health monitoring, and consumer-facing nutrition tools. In real-world meal photos, however, food often appears with cluttered backgrounds such as plates, napkins, utensils, tabletops, and hands. Those extra visual elements can make classification harder and can reduce confidence in downstream nutrition estimates.
 
 \subsection{Why This Problem Matters}
-This project studied whether food-first preprocessing could improve recognition quality. The original proposal centered on a distilled Segment Anything Model (SAM) pipeline that would isolate food regions before classification, followed by a model that mapped the predicted class to USDA nutrition values for calorie and macronutrient estimation. The project also aimed to compare segmented and unsegmented inputs across transformer and convolutional architectures.
+Reliable meal understanding matters in industry because manual nutrition logging is slow, inconsistent, and difficult to scale. Consumer health apps, telehealth platforms, digital coaching products, and wellness programs all benefit from photo-based meal estimation that reduces user effort while keeping nutrition feedback fast and accessible. Restaurants, meal-delivery services, and smart kitchen products can also use food recognition to support nutrition labeling, portion guidance, and personalized recommendations. For these settings, the challenge is not just classifying clean benchmark images, but producing dependable estimates from messy real-world photos where background clutter can degrade accuracy.
 
 \subsection{Overview of Approach}
 The final implemented system grew into a complete monorepo that covered offline preprocessing, model training, evaluation, export, backend serving, and frontend interaction. The backend was fully implemented in Django, the user workflow included portion-size adjustment so that standard-serving nutrition values could be scaled at inference time, and the final deployed interface exposed model selection across three classifier backbones. In the deployed configuration, the Next.js frontend was served from Vercel, the Django API from AWS Lightsail, and classifier inference from per-model Modal endpoints, while the Django layer remained responsible for request validation, optional SAM preprocessing, nutrition lookup, and final response assembly. However, full segmented preprocessing over all 101,000 Food-101 images was not practical on the available local hardware, so this report presents two levels of evidence instead of a complete segmented experiment matrix: verified full-dataset raw results across the three supported backbones and a smaller local ResNet-50 pilot ablation on a reduced stratified manifest. This report therefore documents both the completed engineering work and the current compute-constrained experimental evidence.
@@ -305,22 +305,18 @@ Figure~\ref{fig:frontend} shows the current SnapCal frontend after a successful 
 \end{figure}
 
 \section{Discussion}
-Several aspects of the project worked well. First, the repository matured into a complete end-to-end system rather than stopping at an isolated notebook experiment. The project implemented manifest generation, optional segmentation, model training, evaluation, artifact export, API inference, and frontend interaction in a single reproducible codebase. Second, the verified ResNet-50 raw baseline was strong enough to validate the core learning setup. A top-1 accuracy of 84.83\% and top-5 accuracy of 97.00\% indicated that the training and evaluation pipeline was functioning well and that transfer learning on Food-101 was effective. Third, the final system advanced beyond a single-model prototype: the deployed stack supported per-request model selection across ResNet-50, EfficientNet-B0, and ViT-B/16, with the Django backend preserving one stable inference contract while orchestrating optional SAM preprocessing and nutrition assembly.
+Several aspects of the project worked well. The repository matured into a complete end-to-end system that covered preprocessing, training, evaluation, deployment, and frontend interaction in one reproducible codebase. The verified ResNet-50 raw baseline also confirmed that the core learning pipeline was effective, while the deployed stack extended the project beyond a single-model prototype by supporting live model selection and optional SAM preprocessing.
 
-The project also surfaced several limitations. The most important experimental limitation remained compute scale. Although the product now supported request-level SAM preprocessing for any selected model, the controlled offline segmented evidence in this report still came from a reduced-manifest ResNet-50 pilot rather than a full cross-architecture segmented training sweep. Similarly, ViT-B/16 underperformed strongly under the short local 3-epoch schedule, which suggested that backbone comparisons depended heavily on training budget and tuning rather than architecture names alone. The calorie-estimation stage also continued to depend on a mapping table that still required additional curation for part of the label set and on an evaluation protocol that had not yet been formalized, which prevented a strong calorie MAE claim.
+The project also exposed clear limitations. The main research limitation was compute scale: the controlled segmented experiment remained a reduced-manifest ResNet-50 pilot rather than a full cross-architecture study. ViT-B/16 also underperformed under the short local training schedule, showing that fair backbone comparison depended heavily on training budget and tuning. In addition, calorie evaluation remained incomplete because the Food-101-to-USDA mapping still needed curation and the external evaluation protocol was not yet finalized.
 
-Overall, the project succeeded more clearly as an engineering system than as a finished research matrix. The deployed application demonstrated a complete multi-model meal-analysis workflow with portion scaling and optional segmentation, while the offline results provided strong raw baselines and an honest preliminary segmentation signal. The remaining work is therefore less about basic system feasibility and more about scaling the segmentation experiments, tuning weaker backbones, and formalizing the calorie-evaluation methodology.
+Overall, SnapCal succeeded more clearly as a deployed engineering system than as a fully completed experimental study. The strongest next steps are scaling the segmentation experiments, revisiting weaker backbones under better training settings, and formalizing calorie benchmarking.
 
 \section{Conclusion and Future Work}
-This project presented SnapCal, a food recognition and calorie estimation system built around Food-101 classification, optional MobileSAM preprocessing, USDA nutrition lookup, a Django inference backend, and a Next.js frontend. The completed implementation covered the full path from raw image input to portion-adjusted nutrition output and ultimately matured into a deployed multi-service system using Vercel for the frontend, AWS Lightsail for the Django API, and Modal for classifier inference. The final product supported live model selection across ResNet-50, EfficientNet-B0, and ViT-B/16, as well as request-level SAM preprocessing through the backend.
+SnapCal delivered an end-to-end food recognition and calorie estimation system that combined Food-101 classification, optional MobileSAM preprocessing, USDA nutrition lookup, and a deployed web inference workflow. The final system supported live model selection across ResNet-50, EfficientNet-B0, and ViT-B/16, plus portion-scaled nutrition output through a Django-backed API.
 
-Experimentally, the strongest verified classifier in the repository remained the raw-image ResNet-50 baseline, which achieved 84.83\% top-1 accuracy and 97.00\% top-5 accuracy on the Food-101 test set. EfficientNet-B0 was close at 84.00\% top-1 accuracy, making it a credible lighter-weight alternative, while ViT-B/16 underperformed under the same short local training regime. To probe the segmentation question under realistic local compute constraints, the project also ran a matched ResNet-50 pilot ablation on a reduced 808-image manifest. In that pilot, segmented inputs underperformed raw inputs, achieving 11.88\% top-1 accuracy versus 15.84\% for the raw-input pilot. Because the pilot used only two test examples per class and a speed-oriented local segmentation configuration, it should still be interpreted as a preliminary signal rather than a definitive answer.
+The strongest verified model was the raw-image ResNet-50 baseline at 84.83\% top-1 and 97.00\% top-5 accuracy on the full Food-101 test split. EfficientNet-B0 performed similarly, while ViT-B/16 lagged under the same short local training setup. A reduced-manifest ResNet-50 pilot also provided an early segmentation result, where segmented inputs underperformed raw inputs, but that finding remains preliminary because of the small evaluation set and speed-oriented local preprocessing configuration.
 
-Future work should focus on three areas. First, the segmentation study should be rerun at full scale and extended across all three architectures so that the research question can be answered under controlled conditions rather than only through product-side deployment support. Second, the weak ViT-B/16 result should be revisited with longer training and better-tuned optimization settings. Third, calorie evaluation should move from product functionality to formal benchmarking after the USDA mappings are fully curated and a proper external evaluation protocol is defined.
-
-\begin{acks}
-This report used the course-provided ACM template structure as a starting point and was adapted into a class project report format. The SnapCal codebase integrates research components, deployment utilities, and application code across Python, Django, and Next.js.
-\end{acks}
+Future work should focus on full-scale segmented experiments across all supported architectures, stronger tuning for weaker backbones, and a formal calorie-evaluation protocol after USDA mapping curation is complete.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}
@@ -347,22 +343,22 @@ The repository snapshot used for this report contained the following report-rele
 \section{Deployment Endpoints}
 The final deployed system used the following public endpoints at the time of writing:
 
-\noindent Frontend: \url{https://snapcal.jaymalve.dev}
+\noindent \textbf{Frontend:} \url{https://snapcal.jaymalve.dev}
 
-\noindent Django API: \url{https://api.snapcal.jaymalve.dev}
+\noindent \textbf{Django API:} \url{https://api.snapcal.jaymalve.dev}
 
-\noindent GitHub repository: \url{https://github.com/jaymalve/snapcal}
+\noindent \textbf{GitHub repository:} \url{https://github.com/jaymalve/snapcal}
 
-\noindent Modal ResNet-50 Health Endpoint: \url{https://jaymalveus--snapcal-inference-health-resnet50.modal.run}
+\noindent \textbf{Modal ResNet-50 Health Endpoint:} \url{https://jaymalveus--snapcal-inference-health-resnet50.modal.run}
 
-\noindent Modal ResNet-50 Prediction Endpoint: \url{https://jaymalveus--snapcal-inference-predict-resnet50.modal.run}
+\noindent \textbf{Modal ResNet-50 Prediction Endpoint:} \url{https://jaymalveus--snapcal-inference-predict-resnet50.modal.run}
 
-\noindent Modal EfficientNet-B0 Health Endpoint: \url{https://jaymalveus--snapcal-inference-health-efficientnet-b0.modal.run}
+\noindent \textbf{Modal EfficientNet-B0 Health Endpoint:} \url{https://jaymalveus--snapcal-inference-health-efficientnet-b0.modal.run}
 
-\noindent Modal EfficientNet-B0 Prediction Endpoint: \url{https://jaymalveus--snapcal-inference-predict-efficientnet-b0.modal.run}
+\noindent \textbf{Modal EfficientNet-B0 Prediction Endpoint:} \url{https://jaymalveus--snapcal-inference-predict-efficientnet-b0.modal.run}
 
-\noindent Modal ViT-B/16 Health Endpoint: \url{https://jaymalveus--snapcal-inference-health-vit-b16.modal.run}
+\noindent \textbf{Modal ViT-B/16 Health Endpoint:} \url{https://jaymalveus--snapcal-inference-health-vit-b16.modal.run}
 
-\noindent Modal ViT-B/16 Prediction Endpoint: \url{https://jaymalveus--snapcal-inference-predict-vit-b16.modal.run}
+\noindent \textbf{Modal ViT-B/16 Prediction Endpoint:} \url{https://jaymalveus--snapcal-inference-predict-vit-b16.modal.run}
 
 \end{document}
